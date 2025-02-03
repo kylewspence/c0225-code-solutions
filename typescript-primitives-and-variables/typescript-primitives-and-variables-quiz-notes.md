@@ -9,6 +9,7 @@ Answer the following questions in the provided markdown file before turning in t
 - How do you **declare** a variable?
   Using var, let, or const
 - # How do you initialize (**assign a value to**) a variable?
+  =
 - What characters are allowed in variable names?
   letters, digits, underscores, dollar signs, must start with a letter, $, or \_.
 - What does it mean to say that variable names are "case sensitive"?
