@@ -20,3 +20,5 @@ const applePen: string = `${fruit}${item}`;
 console.log(`I have a ${item}`);
 console.log(`I have a ${fruit}`);
 console.log(applePen);
+
+//
