@@ -5,8 +5,9 @@
 Answer the following questions in the provided markdown file before turning in this exercise:
 
 - What is the syntax for writing a template literal?
-
+  ${}
 - What is "string interpolation"?
+  Substituting parts of a string with an embedded expression
 
 ## Notes
 
