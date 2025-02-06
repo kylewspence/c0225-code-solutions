@@ -40,7 +40,7 @@ interface Person {
 
 const kyle: Person = {
   name: 'Kyle Spence',
-  age: 21,
+  age: 35,
 };
 
 console.log(kyle);
