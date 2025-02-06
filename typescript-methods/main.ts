@@ -30,10 +30,10 @@ const library: Book[] = [
 ];
 
 const lastBook = library.pop();
-console.log(`Last Book: ${lastBook}.`);
+console.log('Last Book:', lastBook);
 
 const firstBook = library.shift();
-console.log(`First Book: ${firstBook}.`);
+console.log('First Book:', firstBook);
 
 const js: Book = {
   title: 'JavaScript for Impatient Programmers',
