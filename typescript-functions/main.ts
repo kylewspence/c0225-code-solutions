@@ -29,11 +29,11 @@ const person: Person = {
   lastName: 'Spence',
 };
 
-const getFirstName = (person: string): string => {
-  return person;
+const getFirstName = (person: Person): string => {
+  return person.firstName;
 };
 
-const firstName: string = getFirstName(person.firstName);
+const firstName: string = getFirstName(person);
 console.log('Get first name function:', firstName);
 
 const colors: string[] = ['red', 'white', 'blue'];
