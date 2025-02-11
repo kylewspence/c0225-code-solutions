@@ -1,8 +1,9 @@
 /* exported getStudentNames */
 function getStudentNames(students: any[]): any {
-  const names = [];
+  const array = [];
   for (const student of students) {
-    names.push(student.name);
+    array.push(student.name);
+    console.log(array);
   }
-  return names;
+  return array;
 }

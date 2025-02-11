@@ -1,9 +1,10 @@
 'use strict';
 /* exported getStudentNames */
 function getStudentNames(students) {
-  const names = [];
+  const array = [];
   for (const student of students) {
-    names.push(student.name);
+    array.push(student.name);
+    console.log(array);
   }
-  return names;
+  return array;
 }
