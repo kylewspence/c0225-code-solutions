@@ -1,0 +1,17 @@
+* {
+  box-sizing: border-box;
+}
+
+button:hover {
+  background-color: black;
+  color: white;
+}
+
+tr:nth-child(odd) {
+  background-color: lightgrey;
+}
+
+thead th {
+  background-color: black;
+  color: white;
+}
