@@ -5,8 +5,9 @@
 Answer the following questions in the provided markdown file before turning in this exercise:
 
 - What is a pseudo-class?
-
+  Allow us to apply styles to elements based on their state or position
 - What are CSS pseudo-classes useful for?
+  Making UI components more dynamic and visually appealing
 
 ## Notes
 
