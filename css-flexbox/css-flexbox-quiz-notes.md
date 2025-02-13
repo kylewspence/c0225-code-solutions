@@ -5,12 +5,13 @@
 Answer the following questions in the provided markdown file before turning in this exercise:
 
 - What is the default `flex-direction` of a `flex` container?
-
+  row
 - What is the default `flex-wrap` of a `flex` container?
-
+  no wrap
 - What axis do the `justify-content` properties work on?
-
+  primary
 - What axis do the `align-items` properties work on?
+  Vertical
 
 ## Notes
 
