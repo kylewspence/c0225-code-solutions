@@ -1,0 +1,13 @@
+/* <h1 class="first-class other-class different-class">Style me!</h1> */
+
+.first-class {
+  color: goldenrod;
+}
+
+.different-class {
+  color: indigo;
+}
+
+.other-class {
+  color: chartreuse;
+}
