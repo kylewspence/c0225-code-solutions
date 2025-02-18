@@ -96,9 +96,9 @@ function renderPokemon(pokemon: Pokemon): HTMLDivElement {
 }
 
 const $row = document.querySelector('.row');
+if (!$row) throw new Error('The $row query failed');
 
 for (let i = 0; i < pokedex.length; i++) {
-  if (!$row) throw new Error('The $row query failed');
   const pokemonElement = renderPokemon(pokedex[i]);
   $row.appendChild(pokemonElement);
 }
