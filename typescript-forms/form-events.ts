@@ -35,12 +35,3 @@ $nameInput.addEventListener('input', handleInput);
 $emailInput.addEventListener('focus', handleFocus);
 $emailInput.addEventListener('blur', handleBlur);
 $emailInput.addEventListener('input', handleInput);
-
-// const $inputs = document.querySelectorAll('input');
-// if (!$inputs) throw new Error('No inputs found');
-
-// $inputs.forEach((input) => {
-//   input.addEventListener('focus', handleFocus);
-//   input.addEventListener('blur', handleBlur);
-//   input.addEventListener('input', handleInput);
-// });
