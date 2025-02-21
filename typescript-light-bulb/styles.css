@@ -1,0 +1,41 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.light-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: rgb(255, 244, 199);
+}
+
+.light-off-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: black;
+}
+
+.light-on {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(transparent, rgb(255, 221, 1));
+}
+
+.light-off {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(transparent, rgb(25, 25, 25));
+}
+
+.hidden {
+  display: none;
+}
