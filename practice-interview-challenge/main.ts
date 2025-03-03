@@ -3,6 +3,7 @@ function getRangeReport(start: number, end: number): any {
   const oddsArray = [];
   const evensArray = [];
   const allNum = [];
+
   for (let i = start; i <= end; i++) {
     totalNum += i;
     if (i % 2 !== 0) {
@@ -15,6 +16,7 @@ function getRangeReport(start: number, end: number): any {
       allNum.push(i);
     }
   }
+
   const averageNum = totalNum / (end - start + 1);
   const object = {
     total: totalNum,
@@ -25,4 +27,5 @@ function getRangeReport(start: number, end: number): any {
   };
   return object;
 }
-console.log(getRangeReport(10, 50));
+
+console.log(getRangeReport(1, 10));
