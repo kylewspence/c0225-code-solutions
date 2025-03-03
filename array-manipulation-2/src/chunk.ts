@@ -1,9 +1,8 @@
 /* exported chunk */
 function chunk(array: any, size: any): any {
   const result = [];
-  for (let i = 0; i < size; i++) {
-    array.slice(0, size);
-    result.push(i);
+  for (let i = 0; i < array.length; i += size) {
+    result.push(array.slice(i, i + size));
   }
   return result;
 }
