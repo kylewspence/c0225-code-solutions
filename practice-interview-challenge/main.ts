@@ -2,7 +2,7 @@ function getRangeReport(start: number, end: number): any {
   let totalNum = 0;
   const oddsArray = [];
   const evensArray = [];
-  const allNum = [];
+  const rangeArray = [];
 
   for (let i = start; i <= end; i++) {
     totalNum += i;
@@ -13,19 +13,19 @@ function getRangeReport(start: number, end: number): any {
       evensArray.push(i);
     }
     if (i) {
-      allNum.push(i);
+      rangeArray.push(i);
     }
   }
 
   const averageNum = totalNum / (end - start + 1);
-  const object = {
+  const report = {
     total: totalNum,
     odds: oddsArray,
     evens: evensArray,
-    numbers: allNum,
+    range: rangeArray,
     average: averageNum,
   };
-  return object;
+  return report;
 }
 
 console.log(getRangeReport(1, 10));
