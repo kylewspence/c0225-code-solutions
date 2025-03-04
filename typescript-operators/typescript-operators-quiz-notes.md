@@ -22,10 +22,13 @@ Answer the following questions in the provided markdown file before turning in t
   Prevents errors when accessing nested properties of null or undefined.
 
 - What is `...` (spread) syntax? How do you use it with arrays and objects?
-
+  Used to copy or merge arrays and objects.
 - What data types can be spread into an array? Into an object?
+  Arrays: Any iterable (arrays, strings, sets)
+  Objects: only works with objects.
 
 - How does spread syntax differ from rest syntax?
+  Spread is for unpacking elements and rest is for gathering elements into an array.
 
 ## Notes
 
