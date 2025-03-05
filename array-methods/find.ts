@@ -24,7 +24,5 @@ const products: Product[] = [
 const user = users.find((user) => user.id === 2);
 console.log('user', user);
 
-const expensiveProduct = products.find(({ price }) => price > 900);
-console.log('expensiveProduct', expensiveProduct);
-
-// Could use destructuring as well.
+const highPrice = products.find((highPrice) => highPrice.price > 900);
+console.log('High Price:', highPrice);

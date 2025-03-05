@@ -12,8 +12,8 @@ const names = [
   'Donna',
 ];
 
-const even = numbers.filter((n) => n % 2 === 0);
-console.log('Even numbers', even);
+const evenNum = numbers.filter((num) => num % 2 === 0);
+console.log('Even numbers:', evenNum);
 
-const noDs = names.filter((n) => !n.includes('d') && !n.includes('D'));
-console.log('No D', noDs);
+const noDs = names.filter((num) => !num.includes('d') && !num.includes('D'));
+console.log('No D:', noDs);
