@@ -20,3 +20,7 @@ const sampleObj = {
 const sampleArray = ['key1', 'key2', 'key5'];
 
 console.log(pick(sampleObj, sampleArray));
+
+// key is set equal to the current index.
+// if the current index in source object && source object at current index is not undefined then
+// in the new object at current index should equal whatever the source current index is.
