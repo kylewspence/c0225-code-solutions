@@ -13,7 +13,7 @@ Answer the following questions in the provided markdown file before turning in t
 - Give at least one use case for each of the commands listed in this exercise.
 
   - `man`
-    man ls - view documentation on ls
+    man ls - view documentation on ls.
 
   - `cat`
     cat hello.txt - print contents of hello.text
@@ -37,6 +37,8 @@ Answer the following questions in the provided markdown file before turning in t
 
 - What are the three virtues of a great programmer?
   Laziness, imaptience, hubris.
+
+  I am not sure why this isnt on my pull request.
 
 ## Notes
 
