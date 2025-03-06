@@ -29,14 +29,10 @@ async function throwChained(): Promise<void> {
   console.log(elapsed(), 'throwChained3:', msg3);
 }
 
-async function bubbleFunction(): Promise<void> {
-  try {
-    await throwOnce();
-    await throwSeveral();
-    await throwChained();
-  } catch (error) {
-    console.log(elapsed(), 'Global Error');
-  }
+try {
+  await throwOnce();
+  await throwSeveral();
+  await throwChained();
+} catch (error) {
+  console.log(elapsed(), 'Global Error');
 }
-
-bubbleFunction();
