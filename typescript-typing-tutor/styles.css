@@ -1,0 +1,25 @@
+* {
+  box-sizing: border-box;
+}
+
+.text-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: xx-large;
+}
+
+.next-letter {
+  text-decoration: underline;
+  color: blue;
+}
+
+.correct {
+  color: green;
+  font-weight: bold;
+}
+
+.incorrect {
+  color: red;
+}
