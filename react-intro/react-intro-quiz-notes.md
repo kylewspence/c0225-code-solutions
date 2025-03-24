@@ -9,7 +9,7 @@ Answer the following questions in the provided markdown file before turning in t
 - What is a React component?
   self-contained collection of html, css , and js.
 - How do you mount a React app (root component) to the DOM?
-  main.tsx
+  react dom package to create a root div.
 - What are some other popular frontend frameworks?
   Angular and vue
 
