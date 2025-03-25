@@ -13,7 +13,7 @@ export function Image({ srcs }: Props) {
           className="image-fill"
           src={srcs[index]}
           alt="space-image"
-          onClick={() => setIndex(index + 1)}
+          onClick={() => setIndex((index + 1) % srcs.length)}
         />
       </div>
     </div>
