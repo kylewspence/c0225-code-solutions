@@ -11,9 +11,11 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -22,6 +24,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -38,5 +41,32 @@
 }
 
 .read-the-docs {
-  color: #888;
+  background-color: #888;
+}
+
+.purple {
+  background-color: rgb(55, 1, 55);
+}
+
+.light-purple {
+  background-color: rgb(104, 29, 104);
+}
+
+.red {
+  background-color: red;
+}
+
+.orange {
+  background-color: orange;
+  color: black;
+}
+
+.yellow {
+  background-color: yellow;
+  color: black;
+}
+
+.white {
+  background-color: white;
+  color: black;
 }
