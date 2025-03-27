@@ -7,8 +7,8 @@ type PokeProps = {
 export function PokemonList({ pokedex }: PokeProps) {
   return (
     <ul>
-      {pokedex.map((Pokemon) => (
-        <li key={Pokemon.number}>{Pokemon.name}</li>
+      {pokedex.map((pokemon) => (
+        <li key={pokemon.number}>{pokemon.name}</li>
       ))}
     </ul>
   );
