@@ -40,7 +40,7 @@ export function ValidatedInput() {
     <div className="flex w-full m-12">
       <label>
         <span className="text-gray-700">Password</span>
-        <div className="relative w-80">
+        <div className="relative w-100">
           <input
             className="w-full py-1 pl-2 pr-8 border border-gray-200 rounded"
             type="text"
