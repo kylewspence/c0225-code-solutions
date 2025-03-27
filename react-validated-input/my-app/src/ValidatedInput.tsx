@@ -21,11 +21,21 @@ function containsSpecial(pwd: string): boolean {
   return false;
 }
 
+function containsCapital(pwd: string): boolean {
+  for (const char of pwd) {
+    if (char >= 'A' && char <= 'Z') {
+      return true;
+    }
+  }
+  return false;
+}
+
 export function ValidatedInput() {
   const [password, setPassword] = useState('');
   const isLongEnough = password.length >= 8;
   const hasNumber = containsNumber(password);
   const hasSpecial = containsSpecial(password);
+  const hasCapital = containsCapital(password);
   return (
     <div className="flex w-full m-12">
       <label>
@@ -38,11 +48,14 @@ export function ValidatedInput() {
             onChange={(change) => setPassword(change.target.value)}
           />
           <div className="absolute inset-y-0 right-2 flex items-center">
-            <Foo isValid={isLongEnough && hasNumber && hasSpecial} />
+            <Foo
+              isValid={isLongEnough && hasNumber && hasSpecial && hasCapital}
+            />
           </div>
         </div>
         <div className="p-1 text-red-700">
           {!isLongEnough && <div>Password must be at least 8 characters.</div>}
+          {!hasCapital && <div>Password must contain 1 capital letter.</div>}
           {!hasNumber && <div>Password must include at least one number.</div>}
           {!hasSpecial && (
             <div>Password must include at least one special character.</div>
