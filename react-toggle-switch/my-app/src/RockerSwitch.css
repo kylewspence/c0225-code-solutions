@@ -1,0 +1,96 @@
+ {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0 auto;
+}
+
+.light-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: rgb(255, 244, 199);
+}
+
+.light-off-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: black;
+}
+
+.light-on {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(transparent, rgb(255, 221, 1));
+}
+
+.light-off {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(transparent, rgb(25, 25, 25));
+}
+
+.hidden {
+  display: none;
+}
+
+.light-switch {
+  position: fixed;
+  right: 10%;
+  top: 50%;
+  margin-top: -60px;
+  width: 60px;
+  height: 120px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.3s;
+}
+
+.switch-top,
+.switch-bottom {
+  width: 100%;
+  height: 50%;
+  transition: background-color 0.3s;
+}
+
+.switch-top {
+  background-color: rgb(200, 200, 200);
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.switch-bottom {
+  background-color: gray;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+.switch-on .switch-top {
+  background: linear-gradient(transparent, rgba(34, 32, 32, 0.433));
+  background-color: white;
+}
+
+.switch-on .switch-bottom {
+  background-color: grey;
+}
+
+.switch-off .switch-top {
+  background-color: grey;
+}
+
+.switch-off .switch-bottom {
+  background: linear-gradient(to top, transparent, rgba(34, 32, 32, 0.433));
+  background-color: white;
+}
+
+.switch-off {
+  box-shadow: 0 0 200px rgba(72, 119, 220, 1);
+}
