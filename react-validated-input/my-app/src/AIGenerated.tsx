@@ -1,7 +1,15 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Foo } from './Icon';
 
-function validatePassword(pwd: string) {
+interface ValidationResult {
+  isLongEnough: boolean;
+  hasNumber: boolean;
+  hasCapital: boolean;
+  hasSpecial: boolean;
+  errorMessages: string[];
+}
+
+function validatePassword(pwd: string): ValidationResult {
   const isLongEnough = pwd.length >= 8;
   const hasNumber = /\d/.test(pwd);
   const hasCapital = /[A-Z]/.test(pwd);
@@ -19,10 +27,16 @@ function validatePassword(pwd: string) {
 
   return { isLongEnough, hasNumber, hasCapital, hasSpecial, errorMessages };
 }
+
 export function ValidatedInput() {
   const [password, setPassword] = useState('');
+
+  // Memoize the validation result so it only recalculates when password changes.
   const { isLongEnough, hasNumber, hasCapital, hasSpecial, errorMessages } =
-    validatePassword(password);
+    useMemo(() => validatePassword(password), [password]);
+
+  const allValid = isLongEnough && hasNumber && hasCapital && hasSpecial;
+
   return (
     <div className="flex w-full m-12">
       <label>
@@ -32,12 +46,10 @@ export function ValidatedInput() {
             className="w-full py-1 pl-2 pr-8 border border-gray-200 rounded"
             type="text"
             value={password}
-            onChange={(change) => setPassword(change.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
           />
           <div className="absolute inset-y-0 right-2 flex items-center">
-            <Foo
-              isValid={isLongEnough && hasNumber && hasSpecial && hasCapital}
-            />
+            <Foo isValid={allValid} />
           </div>
         </div>
         <div className="p-1 text-red-700">
