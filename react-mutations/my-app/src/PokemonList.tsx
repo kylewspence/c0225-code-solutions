@@ -1,3 +1,5 @@
+import { PokemonImage } from './PokemonImage';
+
 export type Pokemon = {
   id: number;
   name: string;
@@ -12,7 +14,10 @@ export function PokemonList({ pokedex }: Props) {
   return (
     <ul>
       {pokedex.map((pokemon) => (
-        <li key={pokemon.id}>{pokemon.name}</li>
+        <li key={pokemon.id}>
+          <PokemonImage name={pokemon.name} />
+          <p>{pokemon.name}</p>
+        </li>
       ))}
     </ul>
   );
