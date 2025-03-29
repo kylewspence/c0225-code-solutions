@@ -10,5 +10,11 @@ export function FetchPokemon({ usedNames, onAdd }: Props) {
     ', '
   )}. Respond with only the name.`;
 
-  return <AIRequester userInput={prompt} onResult={onAdd} />;
+  return (
+    <AIRequester
+      userInput={prompt}
+      onResult={onAdd}
+      buttonText="Generate Pokemon"
+    />
+  );
 }

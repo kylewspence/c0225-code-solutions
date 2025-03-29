@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars -- Remove me */
 import { useState } from 'react';
 import { Pokemon, PokemonList } from './PokemonList';
+import { FetchPokemon } from './Fetch';
+import { GenerateQuiz } from './GenerateQuiz';
 
 const initialPokedex: Pokemon[] = [
   { id: 1, name: 'Bulbasaur' },
@@ -39,6 +41,12 @@ export function App() {
       <button onClick={() => handleAdd(addPokemon)}>Add</button>
       <button onClick={() => handleUpdate(updatePokemon)}>Update</button>
       <button onClick={() => handleRemove(removePokemon.id)}>Remove</button>
+      <FetchPokemon
+        usedNames={pokedex.map((p) => p.name)}
+        onAdd={(name) => handleAdd({ id: Date.now(), name })}
+      />
+      {/* Other components for Pokémon features */}
+      <GenerateQuiz pokedex={pokedex} />
     </div>
   );
 }

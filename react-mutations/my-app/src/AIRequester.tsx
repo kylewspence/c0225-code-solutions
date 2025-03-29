@@ -1,11 +1,19 @@
 type Props = {
   userInput: string;
   onResult: (result: string) => void;
+  buttonText: string;
 };
 
-export function AIRequester({ userInput, onResult }: Props) {
+// API Key Variables
+const key1 = 'sk-proj-7vyDO4PFulA9RzJM_KxUIZtVTUOmdlNR7Oy8D';
+const key2 = 'q1a8rQtNWWnRJ3rRtrmGJu808dnJveOjer0dVT3BlbkFJI';
+const key3 = 'uqxWfNJ9rai7axHkcNhLUvJVSW1f-pksYl4jIt8Dvq9eeFM';
+const key4 = 'vzFw4qYu-CcieFlcaznL-43CIA';
+
+export function AIRequester({ userInput, onResult, buttonText }: Props) {
   async function handleClick() {
     console.log('Clicked! Used Names:', userInput);
+
     // 1. Construct prompt
     const prompt = `You are a general purpose AI requester accepting ${userInput} as your request.`;
 
@@ -14,7 +22,7 @@ export function AIRequester({ userInput, onResult }: Props) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer YOUR_OPENAI_API_KEY`,
+        Authorization: `Bearer ${key1}${key2}${key3}${key4}`,
       },
       body: JSON.stringify({
         model: 'gpt-3.5-turbo',
@@ -28,5 +36,5 @@ export function AIRequester({ userInput, onResult }: Props) {
     onResult(name);
     console.log('Data:', data);
   }
-  return <button onClick={handleClick}>AI Request</button>;
+  return <button onClick={handleClick}>{buttonText}</button>;
 }

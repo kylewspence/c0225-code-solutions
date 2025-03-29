@@ -3,7 +3,7 @@ export type Pokemon = {
   name: string;
 };
 
-type Props = {
+export type Props = {
   pokedex: Pokemon[];
 };
 
