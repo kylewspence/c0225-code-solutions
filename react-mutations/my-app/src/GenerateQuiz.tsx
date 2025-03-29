@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useImperativeHandle, forwardRef } from 'react';
 import { PokemonImage } from './PokemonImage';
 
 type Pokemon = {
@@ -8,6 +8,10 @@ type Pokemon = {
 
 type Props = {
   pokedex: Pokemon[];
+};
+
+export type GenerateQuizHandle = {
+  generateQuiz: () => Promise<void>;
 };
 
 async function fetchQuiz(prompt: string): Promise<string> {
@@ -32,20 +36,25 @@ async function fetchQuiz(prompt: string): Promise<string> {
   return data.choices[0].message.content.trim();
 }
 
-export function GenerateQuiz({ pokedex }: Props) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [quizConfig, setQuizConfig] = useState<any | null>(null);
-  const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
+// Wrap the component with forwardRef to expose methods to parent components.
+export const GenerateQuiz = forwardRef<GenerateQuizHandle, Props>(
+  ({ pokedex }, ref) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [quizConfig, setQuizConfig] = useState<any | null>(null);
+    const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(
+      null
+    );
 
-  async function handleClick() {
-    const pokemon = pokedex[Math.floor(Math.random() * pokedex.length)] ?? {
-      id: 0,
-      name: 'Pikachu',
-    };
-    setSelectedPokemon(pokemon);
-    const prompt = `
+    // Rename handleClick to generateQuiz for clarity.
+    async function generateQuiz() {
+      const pokemon = pokedex[Math.floor(Math.random() * pokedex.length)] ?? {
+        id: 0,
+        name: 'Pikachu',
+      };
+      setSelectedPokemon(pokemon);
+      const prompt = `
 Create a multiple-choice quiz question about the Pokémon ${pokemon.name}.
-Be creative with the questions. Dont just ask what type it is.
+Be creative with the questions. Don't just ask what type it is.
 Format it as valid JSON:
 {
   "title": "Quiz on ${pokemon.name}",
@@ -56,36 +65,41 @@ Format it as valid JSON:
 Respond only with valid JSON.
 `;
 
-    try {
-      const result = await fetchQuiz(prompt);
-      const parsed = JSON.parse(result);
-      setQuizConfig(parsed);
-    } catch (err) {
-      console.error('Failed to fetch or parse result:', err);
+      try {
+        const result = await fetchQuiz(prompt);
+        const parsed = JSON.parse(result);
+        setQuizConfig(parsed);
+      } catch (err) {
+        console.error('Failed to fetch or parse result:', err);
+      }
     }
-  }
 
-  return (
-    <div>
-      <button onClick={handleClick}>Generate Quiz</button>
-      {quizConfig && (
-        <div>
-          <h2>{quizConfig.title}</h2>
-          <p>{quizConfig.question}</p>{' '}
-          {selectedPokemon && (
-            <>
-              <PokemonImage name={selectedPokemon.name} />
-              <p>{selectedPokemon.name}</p>
-            </>
-          )}
-          <ul>
-            {quizConfig.choices.map((choice: string) => (
-              <li key={choice}>{choice}</li>
-            ))}
-          </ul>
-          <small>Answer: {quizConfig.answer}</small>
-        </div>
-      )}
-    </div>
-  );
-}
+    // Expose the generateQuiz method to the parent via the ref.
+    useImperativeHandle(ref, () => ({
+      generateQuiz,
+    }));
+
+    return (
+      <div>
+        {quizConfig && (
+          <div>
+            <h2>{quizConfig.title}</h2>
+            <p>{quizConfig.question}</p>
+            {selectedPokemon && (
+              <>
+                <PokemonImage name={selectedPokemon.name} />
+                <p>{selectedPokemon.name}</p>
+              </>
+            )}
+            <ul>
+              {quizConfig.choices.map((choice: string) => (
+                <li key={choice}>{choice}</li>
+              ))}
+            </ul>
+            <small>Answer: {quizConfig.answer}</small>
+          </div>
+        )}
+      </div>
+    );
+  }
+);
