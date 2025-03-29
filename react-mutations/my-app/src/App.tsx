@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Pokemon, PokemonList } from './PokemonList';
 import { FetchPokemon } from './Fetch';
 import { GenerateQuiz } from './GenerateQuiz';
+import './App.css';
 
 const initialPokedex: Pokemon[] = [
   { id: 1, name: 'Bulbasaur' },
@@ -45,7 +46,7 @@ export function App() {
         usedNames={pokedex.map((p) => p.name)}
         onAdd={(name) => handleAdd({ id: Date.now(), name })}
       />
-      {/* Other components for Pokémon features */}
+
       <GenerateQuiz pokedex={pokedex} />
     </div>
   );
