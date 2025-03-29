@@ -6,7 +6,9 @@ export type Pokemon = {
 type Props = {
   pokedex: Pokemon[];
 };
+
 export function PokemonList({ pokedex }: Props) {
+  console.log('pokedex', pokedex);
   return (
     <ul>
       {pokedex.map((pokemon) => (
