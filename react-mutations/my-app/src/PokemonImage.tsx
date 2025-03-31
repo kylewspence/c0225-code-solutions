@@ -25,7 +25,12 @@ export function PokemonImage({ name }: Props) {
   }, [name]);
 
   return imageUrl ? (
-    <img src={imageUrl} alt={name} style={{ width: '100px' }} />
+    <img
+      src={imageUrl}
+      alt={name}
+      className="logo"
+      style={{ width: '100px' }}
+    />
   ) : (
     <p>Loading image for {name}...</p>
   );

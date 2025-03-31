@@ -14,7 +14,7 @@ export function PokemonList({ pokedex }: Props) {
   return (
     <ul>
       {pokedex.map((pokemon) => (
-        <li key={pokemon.id}>
+        <li key={pokemon.id} className="pokemon-card">
           <PokemonImage name={pokemon.name} />
           <p>{pokemon.name}</p>
         </li>

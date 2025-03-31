@@ -4,6 +4,8 @@ import { Pokemon, PokemonList } from './PokemonList';
 import { FetchPokemon } from './Fetch';
 import { GenerateQuiz, GenerateQuizHandle } from './GenerateQuiz';
 import './App.css';
+import { FaTrash } from 'react-icons/fa';
+import { TrashCan } from './Trashcan';
 
 const initialPokedex: Pokemon[] = [
   { id: 1, name: 'Bulbasaur' },
@@ -50,7 +52,10 @@ export function App() {
       <nav className="navbar">
         <button onClick={() => handleAdd(addPokemon)}>Add</button>
         <button onClick={() => handleUpdate(updatePokemon)}>Update</button>
-        <button onClick={() => handleRemove(removePokemon.id)}>Remove</button>
+        <button onClick={() => handleRemove(removePokemon.id)}>
+          <FaTrash />
+        </button>
+        <TrashCan onDropPokemon={(id) => handleRemove(id)} />
         <FetchPokemon
           usedNames={pokedex.map((p) => p.name)}
           onAdd={(name) => handleAdd({ id: Date.now(), name })}
