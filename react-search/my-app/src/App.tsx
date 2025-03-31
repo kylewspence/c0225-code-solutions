@@ -1,5 +1,5 @@
 import './App.css';
-import { QuotesList } from './QuotesList';
+
 import { UserSearch } from './Search';
 
 const quotes = [
@@ -21,9 +21,6 @@ function App() {
   return (
     <div className="search-container">
       <UserSearch quotes={quotes} />
-      <div className="quotes-list">
-        <QuotesList quotes={quotes} />
-      </div>
     </div>
   );
 }

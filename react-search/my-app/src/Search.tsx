@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import MagnifyingGlass from './search-solid.svg';
 import './Search.css';
+import { QuotesList } from './QuotesList';
 
 type Props = {
   quotes: string[];
@@ -25,9 +26,7 @@ export function UserSearch({ quotes }: Props) {
         />
       </div>
       <ul>
-        {filteredQuotes.map((quote, index) => (
-          <li key={index}>{quote}</li>
-        ))}
+        <QuotesList quotes={filteredQuotes} />
       </ul>
     </div>
   );
