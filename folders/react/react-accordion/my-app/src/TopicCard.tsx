@@ -14,7 +14,7 @@ export function TopicCard({ topic, isOpen, onClick }: TopicCardProps) {
       <div onClick={onClick}>
         {isOpen ? '🔽' : '▶️'} {topic.title}
       </div>
-      <div className={`topic-content ${isOpen ? 'open' : ''}`}>
+      <div className={`topic-content ${isOpen ? 'open' : 'closed'}`}>
         <p>{topic.content}</p>
       </div>
     </div>
