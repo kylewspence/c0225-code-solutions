@@ -20,6 +20,7 @@
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
+
 @keyframes pop-wiggle {
   0% {
     transform: scale(1);
@@ -46,6 +47,21 @@
 @media (prefers-reduced-motion: no-preference) {
   .logo:hover {
     animation: pop-wiggle 0.5s ease-out;
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+
   }
 }
 
@@ -56,6 +72,7 @@
 .read-the-docs {
   color: #888;
 }
+
 
 /* Ensure full height for the root container */
 html,
@@ -108,3 +125,5 @@ body,
     transform: rotate(360deg);
   }
 }
+
+
