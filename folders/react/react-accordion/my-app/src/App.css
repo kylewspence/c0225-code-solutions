@@ -43,3 +43,18 @@
 .read-the-docs {
   color: #888;
 }
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-container.light {
+  background-color: white;
+  color: black;
+}
+
+.app-container.dark {
+  background-color: #1e1e1e;
+  color: white;
+}

@@ -1,0 +1,32 @@
+.topic-card {
+  background-color: #e0e0e07a;
+  border: 1px solid black;
+  padding: 10px;
+  font-family: sans-serif;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border-radius: 6px;
+}
+
+.topic-card h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: normal;
+}
+
+.topic-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.1s ease, opacity 0.3s ease;
+  opacity: 0;
+}
+
+.topic-content.open {
+  max-height: 500px;
+  opacity: 1;
+  margin-top: 10px;
+}
+
+.topic-card + .topic-card {
+  margin-top: 8px;
+}
