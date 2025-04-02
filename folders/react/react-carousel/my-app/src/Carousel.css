@@ -1,0 +1,47 @@
+.carousel {
+  position: relative;
+  width: 300px;
+  margin: auto;
+}
+
+.carousel-images {
+  display: flex;
+  overflow: hidden;
+}
+
+.carousel-image {
+  width: 100%;
+  display: block;
+}
+
+.dots-container {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.dot {
+  margin: 0 5px;
+  cursor: pointer;
+  font-size: 20px;
+  color: black;
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.prev {
+  left: 0;
+  margin-left: -10rem;
+}
+
+.next {
+  right: 0;
+  margin-right: -10rem;
+}
+
+.hidden {
+  display: none;
+}

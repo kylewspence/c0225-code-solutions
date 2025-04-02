@@ -1,4 +1,4 @@
-# react-stopwatch-notes
+# react-carousel-component-notes
 
 ## Notes
 
