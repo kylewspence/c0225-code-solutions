@@ -16,10 +16,6 @@ export function Counter() {
     const data = getData();
     setData(data);
     setCounter((prev) => prev + 1);
-    function getData() {
-      // fetch data
-      return { foo: 'bar' };
-    }
   }, [getData]);
 
   return (
