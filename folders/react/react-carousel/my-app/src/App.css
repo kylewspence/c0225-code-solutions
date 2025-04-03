@@ -20,6 +20,35 @@
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
+@keyframes pop-wiggle {
+  0% {
+    transform: scale(1);
+  }
+
+  25% {
+    transform: scale(1.1) rotate(-5deg);
+  }
+
+  50% {
+    transform: scale(1) rotate(5deg);
+  }
+
+  75% {
+    transform: scale(1.1) rotate(-5deg);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* This media query applies the animation to all elements with the class "logo" */
+@media (prefers-reduced-motion: no-preference) {
+  .logo:hover {
+    animation: pop-wiggle 0.5s ease-out;
+  }
+}
+
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);
@@ -36,10 +65,77 @@
   }
 }
 
+.pokestuff {
+  display: flex;
+}
+
 .card {
   padding: 2em;
 }
 
 .read-the-docs {
   color: #888;
+}
+
+/* Ensure full height for the root container
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+} */
+
+/* Navbar styling */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #1a1a1a;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Content container holds left & right panels */
+.content {
+  display: flex;
+  flex: 1;
+  overflow: auto;
+  flex-direction: row;
+}
+
+/* Left panel: Pokedex list */
+.pokedex-container {
+  flex: 1;
+  padding: 1rem;
+  border-right: 1px solid #ccc;
+  display: flex;
+}
+
+/* Right panel: Quiz generator */
+.quiz-container {
+  flex: 2;
+  padding: 1rem;
+  display: flex;
+}
+
+.pokemon-card {
+  display: flex;
+
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.carousel-container {
+  flex: 1;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }

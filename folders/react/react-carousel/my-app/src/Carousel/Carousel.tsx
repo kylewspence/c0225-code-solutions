@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Image } from './App';
+import { Image } from './Appold';
 import { CarouselArrow } from './CarouselArrow';
 import { CarouselDots } from './CarouselDots';
 import { CarouselImage } from './CarouselImage';
 import './Carousel.css';
 
-type CarouselProps = {
+export type CarouselProps = {
   images: Image[];
 };
 
@@ -40,7 +40,7 @@ export function Carousel({ images }: CarouselProps) {
         {images.map((image, index) => (
           <CarouselImage
             key={index}
-            src={image.src}
+            // src={`/images/${image.src}`}
             alt={image.alt}
             isActive={index === currentIndex}
           />
