@@ -1,3 +1,8 @@
+import {
+  FaCircle as SolidCircle,
+  FaRegCircle as RegularCircle,
+} from 'react-icons/fa';
+
 type CarouselDotsProps = {
   total: number;
   currentIndex: number;
@@ -12,13 +17,13 @@ export function CarouselDots({
   return (
     <>
       {Array.from({ length: total }).map((_, index) => (
-        <i
-          key={index}
-          className={`dot ${
-            index === currentIndex ? 'fa-solid' : 'fa-regular'
-          } fa-circle`}
-          onClick={() => onDotClick(index)}
-        />
+        <span key={index} onClick={() => onDotClick(index)}>
+          {index === currentIndex ? (
+            <SolidCircle className="dot" />
+          ) : (
+            <RegularCircle className="dot" />
+          )}
+        </span>
       ))}
     </>
   );

@@ -16,10 +16,11 @@ export function Carousel({ images }: CarouselProps) {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % images.length);
+      setResetKey((prev) => prev + 1);
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [images.length, resetKey]);
+  }, [images, resetKey]);
 
   function handlePrevClick() {
     setResetKey((prev) => prev + 1);
@@ -46,9 +47,7 @@ export function Carousel({ images }: CarouselProps) {
         ))}
       </div>
       <CarouselArrow direction="prev" onClick={handlePrevClick} />
-
       <CarouselArrow direction="next" onClick={handleNextClick} />
-
       <div className="dots-container">
         <CarouselDots
           total={images.length}
@@ -58,6 +57,10 @@ export function Carousel({ images }: CarouselProps) {
             setCurrentIndex(index);
           }}
         />
+      </div>
+      <h2>Auto-slide ID: {resetKey}</h2>
+      <div className="progress-bar">
+        <div className="progress-fill" key={resetKey} />
       </div>
     </div>
   );

@@ -6,10 +6,9 @@ type CarouselImageProps = {
 
 export function CarouselImage({ src, alt, isActive }: CarouselImageProps) {
   return (
-    <img
-      src={src}
-      alt={alt}
-      className={`carousel-image ${isActive ? '' : 'hidden'}`}
-    />
+    <div className={`image-wrapper ${isActive ? '' : 'hidden'}`}>
+      <img src={src} alt={alt} className={`carousel-image`} />
+      <h2>{alt}</h2>
+    </div>
   );
 }
