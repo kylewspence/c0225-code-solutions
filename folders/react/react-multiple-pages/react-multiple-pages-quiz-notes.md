@@ -6,7 +6,7 @@ Answer the following questions in the provided markdown file before turning in t
 
 - How does the browser URL change when navigating through a Single Page App? How does a user expect the URL to change as they navigate through a browser app?
 
-The Browser URL changes without a full page reload using the History API to reflect the current view.
+When not using a routing library, navigating between views in a Single Page App (SPA) using useState or conditional rendering does not change the browser URL — it always stays the same, even though the content updates. Users expect the URL to change with each view or “page” — like /about, /details/42, etc. — so they can bookmark pages, use the back/forward buttons, and reload the page without losing their place.
 
 - What NPM package can be used to make navigating a React app behave as users expect?
 
@@ -26,7 +26,7 @@ Placeholder for nested routes to render their child content.
 
 - What React component is used to statically navigate to another page? What HTML element does it render to?
 
-Static navigation and renders an anchor element.
+Link - static navigation and renders an anchor element.
 
 - What React Router hook is used to access route path dynamic segments (those that start with `:` in the `path`)?
 
