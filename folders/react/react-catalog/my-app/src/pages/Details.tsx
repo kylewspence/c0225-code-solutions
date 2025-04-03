@@ -34,7 +34,7 @@ export function Details() {
   }, [itemId]);
 
   const handleAddToCart = () => {
-    alert('Product added to cart!');
+    alert(`Success! ${name} added to cart.`);
     navigate('/');
   };
 

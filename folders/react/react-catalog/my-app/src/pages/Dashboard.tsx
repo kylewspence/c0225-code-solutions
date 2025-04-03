@@ -19,6 +19,7 @@ export function Dashboard() {
         setIsLoading(false);
       }
     }
+    setIsLoading(true);
     loadItems();
   }, []);
 
