@@ -1,27 +1,25 @@
-"use strict";
+'use strict';
 function handleFocus(event) {
-    console.log('Focus event fired');
-    const $eventTarget = event.target;
-    console.log('Focused element name:', $eventTarget.name);
+  console.log('Focus event fired');
+  const $eventTarget = event.target;
+  console.log('Focused element name:', $eventTarget.name);
 }
 function handleBlur(event) {
-    console.log('Blur event fired');
-    const $eventTarget = event.target;
-    console.log('Blurred element name:', $eventTarget.name);
+  console.log('Blur event fired');
+  const $eventTarget = event.target;
+  console.log('Blurred element name:', $eventTarget.name);
 }
 function handleInput(event) {
-    console.log('Input event fired');
-    const $eventTarget = event.target;
-    console.log('Element name:', $eventTarget.name);
-    console.log('User input:', $eventTarget.value);
+  console.log('Input event fired');
+  const $eventTarget = event.target;
+  console.log('Element name:', $eventTarget.name);
+  console.log('User input:', $eventTarget.value);
 }
 const $textArea = document.querySelector('#user-message');
-if (!$textArea)
-    throw new Error('No textarea found');
+if (!$textArea) throw new Error('No textarea found');
 const $nameInput = document.querySelector('#user-name');
 const $emailInput = document.querySelector('#user-email');
-if (!$emailInput || !$nameInput)
-    throw new Error('No name or email input');
+if (!$emailInput || !$nameInput) throw new Error('No name or email input');
 $textArea.addEventListener('focus', handleFocus);
 $textArea.addEventListener('blur', handleBlur);
 $textArea.addEventListener('input', handleInput);
