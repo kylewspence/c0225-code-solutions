@@ -8,6 +8,8 @@ import { AppDrawer } from './components/AppDrawer';
 export const menuItems = [
   { name: 'About', iconUrl: '/hylian-emblem.svg', path: '/about' },
   { name: 'Catalog', iconUrl: '/catalog.png', path: '/' },
+  { name: 'Vite', iconUrl: '/vite.svg', path: '/' },
+  { name: 'React', iconUrl: '/react.svg', path: '/' },
 ];
 
 export function App() {
