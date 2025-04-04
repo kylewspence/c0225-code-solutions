@@ -5,13 +5,15 @@
 Answer the following questions in the provided markdown file before turning in this exercise:
 
 - What is the `<dialog>` element used for?
-  create modal dialogs that can be shown or hidden with built in browser behavior.
+
+create modal dialogs that can be shown or hidden with built in browser behavior. Can also create non-modal pop ups.
 
 - How do you show and hide a modal dialog?
 
 showModal() and close()
+show() for non-modal.
 
-- How do you manipulate child components in React? Why will that no work for the `<dialog>` element?
+- How do you manipulate child components in React? Why will that not work for the `<dialog>` element?
 
 Props, but they dont work because its methods are only available through direct dom access.
 
