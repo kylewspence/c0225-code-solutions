@@ -32,7 +32,7 @@ export function Catalog() {
     );
   }
   return (
-    <div className="container">
+    <div className="container text-black">
       <h1>Catalog</h1>
       <hr className="py-1" />
       <div className="flex flex-wrap">
