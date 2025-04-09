@@ -1,3 +1,3 @@
 SELECT "actorId", "firstName", "lastName"
 FROM "actors"
-where "actorId" = '40'
+where "actorId" = 40
