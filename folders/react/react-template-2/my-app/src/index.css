@@ -3,6 +3,10 @@
 /* stylelint-disable-next-line import-notation */
 @import 'tw-animate-css';
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
