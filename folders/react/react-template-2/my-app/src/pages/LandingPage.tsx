@@ -33,8 +33,8 @@ const LandingPage = () => {
       </main>
 
       <footer className="text-center text-sm text-muted-foreground py-6">
-        © {new Date().getFullYear()} Smart Financial Tracker. All rights
-        reserved.
+        {/* © {new Date().getFullYear()} Smart Financial Tracker. All rights
+        reserved. */}
       </footer>
     </div>
   );
