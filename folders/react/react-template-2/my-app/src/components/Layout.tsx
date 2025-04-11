@@ -6,42 +6,59 @@ import { Menu } from 'lucide-react';
 const Layout = () => {
   return (
     <div className="relative min-h-screen">
-      {/* Drawer */}
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-4 left-4 z-50">
-            <Menu className="h-5 w-5" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-64 bg-gray-100 p-4 border-r">
-          <h2 className="text-lg font-semibold mb-4">Menu</h2>
-          <nav className="space-y-2">
-            <a
-              href="/dashboard"
-              className="block text-sm text-gray-700 hover:underline">
-              Dashboard
-            </a>
-            <a
-              href="/ai-insights"
-              className="block text-sm text-gray-700 hover:underline">
-              AI Insights
-            </a>
-            <a
-              href="/settings"
-              className="block text-sm text-gray-700 hover:underline">
-              Settings
-            </a>
-          </nav>
-        </SheetContent>
-      </Sheet>
+      <header className="w-full px-6 py-4 border-b bg-white flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="w-5 h-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-64 bg-gray-100 p-4 border-r">
+              <h2 className="text-lg font-semibold mb-4">Menu</h2>
+              <nav className="space-y-2">
+                <a
+                  href="/dashboard"
+                  className="block text-sm text-gray-700 hover:underline">
+                  Dashboard
+                </a>
+                <a
+                  href="/ai-insights"
+                  className="block text-sm text-gray-700 hover:underline">
+                  AI Insights
+                </a>
+                <a
+                  href="/settings"
+                  className="block text-sm text-gray-700 hover:underline">
+                  Settings
+                </a>
+              </nav>
+            </SheetContent>
+          </Sheet>
+
+          <img
+            src="/logo-finsight.png"
+            alt="FinSight"
+            className="h-14 w-auto"
+          />
+        </div>
+        <nav className="space-x-4 text-sm">
+          <a href="/dashboard" className="text-gray-700 hover:underline">
+            Dashboard
+          </a>
+          <a href="/ai-insights" className="text-gray-700 hover:underline">
+            AI Insights
+          </a>
+          <a href="/settings" className="text-gray-700 hover:underline">
+            Settings
+          </a>
+        </nav>
+      </header>
 
       {/* Main content */}
-      <div className="pt-16 px-6">
+      <main className="pt-24 px-6">
         <Outlet />
-      </div>
+      </main>
     </div>
   );
 };

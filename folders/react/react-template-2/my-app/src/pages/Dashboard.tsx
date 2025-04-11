@@ -26,16 +26,44 @@ const Dashboard = () => {
 
           <TabsContent value="spending">
             <Card>
-              <CardContent className="p-4">
-                <h2 className="text-xl font-semibold mb-2">
-                  Monthly Spending Trend
-                </h2>
+              <CardContent className="p-4 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-semibold">
+                    Monthly Spending Trend
+                  </h2>
+                  <div className="space-x-2">
+                    <Button variant="outline" size="sm">
+                      1D
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      7D
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      30D
+                    </Button>
+                  </div>
+                </div>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart
                     data={[
-                      { month: 'Jan', amount: 1200 },
-                      { month: 'Feb', amount: 980 },
-                      { month: 'Mar', amount: 1450 },
+                      { month: 'Jan 2023', amount: 1200 },
+                      { month: 'Feb 2023', amount: 980 },
+                      { month: 'Mar 2023', amount: 1450 },
+                      { month: 'Apr 2023', amount: 1300 },
+                      { month: 'May 2023', amount: 1100 },
+                      { month: 'Jun 2023', amount: 950 },
+                      { month: 'Jul 2023', amount: 1200 },
+                      { month: 'Aug 2023', amount: 1600 },
+                      { month: 'Sep 2023', amount: 1700 },
+                      { month: 'Oct 2023', amount: 1800 },
+                      { month: 'Nov 2023', amount: 1900 },
+                      { month: 'Dec 2023', amount: 2100 },
+                      { month: 'Jan 2024', amount: 2200 },
+                      { month: 'Feb 2024', amount: 2400 },
+                      { month: 'Mar 2024', amount: 2300 },
+                      { month: 'Apr 2024', amount: 2250 },
+                      { month: 'May 2024', amount: 2100 },
+                      { month: 'Jun 2024', amount: 2500 },
                     ]}>
                     <XAxis dataKey="month" />
                     <YAxis />
@@ -87,19 +115,32 @@ const Dashboard = () => {
           </TabsContent>
           <TabsContent value="investments">
             <Card>
-              <CardContent className="p-4">
-                <h2 className="text-xl font-semibold mb-2">
-                  Portfolio Allocation
-                </h2>
+              <CardContent className="p-4 space-y-4">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-semibold">
+                    Portfolio Allocation
+                  </h2>
+                  <div className="space-x-2">
+                    <Button variant="outline" size="sm">
+                      1D
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      7D
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      30D
+                    </Button>
+                  </div>
+                </div>
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
                       dataKey="value"
                       data={[
-                        { name: 'Tech', value: 400 },
-                        { name: 'Healthcare', value: 300 },
-                        { name: 'Finance', value: 300 },
-                        { name: 'Other', value: 200 },
+                        { name: 'Tech', value: 40000 },
+                        { name: 'Healthcare', value: 30000 },
+                        { name: 'Finance', value: 20000 },
+                        { name: 'Other', value: 10000 },
                       ]}
                       cx="50%"
                       cy="50%"
@@ -115,6 +156,28 @@ const Dashboard = () => {
                     <Tooltip />
                   </PieChart>
                 </ResponsiveContainer>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex justify-content:space-around">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Tech</p>
+                    <p className="font-medium">$40,000</p>
+                    <p className="text-green-600 text-sm">+12.5%</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Healthcare</p>
+                    <p className="font-medium">$30,000</p>
+                    <p className="text-green-600 text-sm">+8.3%</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Finance</p>
+                    <p className="font-medium">$20,000</p>
+                    <p className="text-red-600 text-sm">-4.2%</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Other</p>
+                    <p className="font-medium">$10,000</p>
+                    <p className="text-green-600 text-sm">+1.0%</p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
@@ -124,16 +187,30 @@ const Dashboard = () => {
                   <div className="flex items-center justify-between gap-4">
                     <div className="w-40">
                       <h3 className="text-xl font-semibold">PLTR</h3>
-                      <p className="text-green-600">+12%</p>
+                      <p className="text-green-600">+187.5%</p>
                     </div>
                     <div className="flex-1">
-                      <ResponsiveContainer width="100%" height={100}>
+                      <ResponsiveContainer width="100%" height={150}>
                         <LineChart
                           data={[
-                            { month: 'Jan', amount: 70 },
-                            { month: 'Feb', amount: 90 },
-                            { month: 'Mar', amount: 120 },
-                            { month: 'Apr', amount: 87 },
+                            { month: 'Jan 2023', amount: 8 },
+                            { month: 'Feb 2023', amount: 9 },
+                            { month: 'Mar 2023', amount: 9.5 },
+                            { month: 'Apr 2023', amount: 10 },
+                            { month: 'May 2023', amount: 12 },
+                            { month: 'Jun 2023', amount: 10 },
+                            { month: 'Jul 2023', amount: 11 },
+                            { month: 'Aug 2023', amount: 14 },
+                            { month: 'Sep 2023', amount: 13.5 },
+                            { month: 'Oct 2023', amount: 15 },
+                            { month: 'Nov 2023', amount: 17 },
+                            { month: 'Dec 2023', amount: 16 },
+                            { month: 'Jan 2024', amount: 18 },
+                            { month: 'Feb 2024', amount: 19 },
+                            { month: 'Mar 2024', amount: 20 },
+                            { month: 'Apr 2024', amount: 21.5 },
+                            { month: 'May 2024', amount: 22 },
+                            { month: 'Jun 2024', amount: 23 },
                           ]}>
                           <XAxis dataKey="month" />
                           <YAxis />
@@ -151,16 +228,30 @@ const Dashboard = () => {
                   <div className="flex items-center justify-between gap-4">
                     <div className="w-40">
                       <h3 className="text-xl font-semibold">TSLA</h3>
-                      <p className="text-red-600">-33%</p>
+                      <p className="text-green-600">+64.86%</p>
                     </div>
                     <div className="flex-1">
-                      <ResponsiveContainer width="100%" height={100}>
+                      <ResponsiveContainer width="100%" height={150}>
                         <LineChart
                           data={[
-                            { month: 'Jan', amount: 400 },
-                            { month: 'Feb', amount: 420 },
-                            { month: 'Mar', amount: 350 },
-                            { month: 'Apr', amount: 250 },
+                            { month: 'Jan 2023', amount: 185 },
+                            { month: 'Feb 2023', amount: 190 },
+                            { month: 'Mar 2023', amount: 200 },
+                            { month: 'Apr 2023', amount: 195 },
+                            { month: 'May 2023', amount: 210 },
+                            { month: 'Jun 2023', amount: 220 },
+                            { month: 'Jul 2023', amount: 230 },
+                            { month: 'Aug 2023', amount: 225 },
+                            { month: 'Sep 2023', amount: 240 },
+                            { month: 'Oct 2023', amount: 260 },
+                            { month: 'Nov 2023', amount: 250 },
+                            { month: 'Dec 2023', amount: 265 },
+                            { month: 'Jan 2024', amount: 275 },
+                            { month: 'Feb 2024', amount: 290 },
+                            { month: 'Mar 2024', amount: 285 },
+                            { month: 'Apr 2024', amount: 295 },
+                            { month: 'May 2024', amount: 310 },
+                            { month: 'Jun 2024', amount: 305 },
                           ]}>
                           <XAxis dataKey="month" />
                           <YAxis />
