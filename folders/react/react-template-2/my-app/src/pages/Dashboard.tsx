@@ -115,7 +115,7 @@ const Dashboard = () => {
           </TabsContent>
           <TabsContent value="investments">
             <Card>
-              <CardContent className="p-4 space-y-4">
+              <CardContent className="p-4 flex flex-col justify-between h-full">
                 <div className="flex justify-between items-center">
                   <h2 className="text-xl font-semibold">
                     Portfolio Allocation
@@ -132,7 +132,7 @@ const Dashboard = () => {
                     </Button>
                   </div>
                 </div>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
                     <Pie
                       dataKey="value"
@@ -156,32 +156,36 @@ const Dashboard = () => {
                     <Tooltip />
                   </PieChart>
                 </ResponsiveContainer>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex justify-content:space-around">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Tech</p>
-                    <p className="font-medium">$40,000</p>
-                    <p className="text-green-600 text-sm">+12.5%</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Healthcare</p>
-                    <p className="font-medium">$30,000</p>
-                    <p className="text-green-600 text-sm">+8.3%</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Finance</p>
-                    <p className="font-medium">$20,000</p>
-                    <p className="text-red-600 text-sm">-4.2%</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Other</p>
-                    <p className="font-medium">$10,000</p>
-                    <p className="text-green-600 text-sm">+1.0%</p>
+                <div className="flex justify-center">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-50">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Tech</p>
+                      <p className="font-medium">$40,000</p>
+                      <p className="text-green-600 text-sm">+12.5%</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        Healthcare
+                      </p>
+                      <p className="font-medium">$30,000</p>
+                      <p className="text-green-600 text-sm">+8.3%</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Finance</p>
+                      <p className="font-medium">$20,000</p>
+                      <p className="text-red-600 text-sm">-4.2%</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Other</p>
+                      <p className="font-medium">$10,000</p>
+                      <p className="text-green-600 text-sm">+1.0%</p>
+                    </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-              <Card className="max-h-[300px] overflow-y-auto">
+              <Card className="max-h-[200px] overflow-y-auto">
                 <CardContent className="p-4 space-y-4">
                   <p className="text-sm text-muted-foreground">Watchlist:</p>
                   <div className="flex items-center justify-between gap-4">
@@ -276,7 +280,7 @@ const Dashboard = () => {
                     "Your portfolio is well-balanced and trending in the right
                     direction according to your goals."{' '}
                   </p>
-                  <div className="flex justify-center items-end h-full mt-4">
+                  <div className="flex justify-center items-end h-full">
                     <Button variant="outline" size="sm" asChild>
                       <a href="/ai-insights">Explore AI Insights →</a>
                     </Button>

@@ -56,7 +56,7 @@ const Layout = () => {
       </header>
 
       {/* Main content */}
-      <main className="pt-24 px-6">
+      <main className="pt-2 px-6">
         <Outlet />
       </main>
     </div>
