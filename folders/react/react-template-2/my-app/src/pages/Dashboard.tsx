@@ -10,6 +10,7 @@ import {
   Cell,
   Pie,
   PieChart,
+  LabelList,
 } from 'recharts';
 import { Button } from '@/components/ui/button';
 
@@ -126,70 +127,88 @@ const Dashboard = () => {
           <TabsContent value="investments" className="flex flex-col flex-grow">
             <div className="flex-1 flex flex-col gap-6">
               <Card className="h-[420px]">
-                <CardContent className="p-4 h-full flex flex-col justify-between">
-                  <div className="flex justify-between items-center">
-                    <h2 className="text-xl font-semibold">
-                      Portfolio Allocation
-                    </h2>
-                    <div className="space-x-2">
-                      <Button variant="outline" size="sm">
-                        1D
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        7D
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        30D
-                      </Button>
+                <CardContent className="p-4 h-full">
+                  <div className="flex flex-col lg:flex-row justify-between h-full gap-4">
+                    {/* Text Breakdown */}
+                    <div className="flex flex-col justify-start gap-4 lg:w-1/2 pl-4">
+                      <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-semibold">
+                          Portfolio Allocation
+                        </h2>
+                        <div className="space-x-2">
+                          <Button variant="outline" size="sm">
+                            1D
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            7D
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            30D
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-2 gap-x-6 gap-y-2">
+                        <div>
+                          <p className="text-sm text-muted-foreground">Tech</p>
+                          <p className="font-medium">$40,000</p>
+                          <p className="text-green-600 text-sm">+12.5%</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">
+                            Healthcare
+                          </p>
+                          <p className="font-medium">$30,000</p>
+                          <p className="text-green-600 text-sm">+8.3%</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">
+                            Finance
+                          </p>
+                          <p className="font-medium">$20,000</p>
+                          <p className="text-red-600 text-sm">-4.2%</p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Other</p>
+                          <p className="font-medium">$10,000</p>
+                          <p className="text-green-600 text-sm">+1.0%</p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        dataKey="value"
-                        data={[
-                          { name: 'Tech', value: 40000 },
-                          { name: 'Healthcare', value: 30000 },
-                          { name: 'Finance', value: 20000 },
-                          { name: 'Other', value: 10000 },
-                        ]}
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={100}
-                        fill="#8884d8"
-                        label>
-                        {['#8884d8', '#82ca9d', '#ffc658', '#d0ed57'].map(
-                          (color, index) => (
-                            <Cell key={`cell-${index}`} fill={color} />
-                          )
-                        )}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="flex justify-center">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-50">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Tech</p>
-                        <p className="font-medium">$40,000</p>
-                        <p className="text-green-600 text-sm">+12.5%</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          Healthcare
-                        </p>
-                        <p className="font-medium">$30,000</p>
-                        <p className="text-green-600 text-sm">+8.3%</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Finance</p>
-                        <p className="font-medium">$20,000</p>
-                        <p className="text-red-600 text-sm">-4.2%</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Other</p>
-                        <p className="font-medium">$10,000</p>
-                        <p className="text-green-600 text-sm">+1.0%</p>
+
+                    {/* Pie Chart */}
+                    <div className="lg:w-1/2 flex items-center justify-center">
+                      <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl">
+                        <ResponsiveContainer width="100%" height={250}>
+                          <PieChart>
+                            <Pie
+                              dataKey="value"
+                              data={[
+                                { name: 'Tech', value: 40000 },
+                                { name: 'Healthcare', value: 30000 },
+                                { name: 'Finance', value: 20000 },
+                                { name: 'Other', value: 10000 },
+                              ]}
+                              cx="50%"
+                              cy="50%"
+                              outerRadius={80}
+                              fill="#8884d8"
+                              labelLine={false}>
+                              <LabelList
+                                dataKey="value"
+                                position="inside"
+                                formatter={(val: number) =>
+                                  `${Math.round((val / 100000) * 100)}%`
+                                }
+                              />
+                              {['#8884d8', '#82ca9d', '#ffc658', '#d0ed57'].map(
+                                (color, index) => (
+                                  <Cell key={`cell-${index}`} fill={color} />
+                                )
+                              )}
+                            </Pie>
+                            <Tooltip />
+                          </PieChart>
+                        </ResponsiveContainer>
                       </div>
                     </div>
                   </div>
