@@ -9,7 +9,7 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-  res.send('Here are your notes.');
+  res.send('Welcome to the homepage.');
 });
 
 app.get('/notes', (req, res) => {
