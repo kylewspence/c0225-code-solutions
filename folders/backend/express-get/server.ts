@@ -28,19 +28,22 @@ app.get('/api/countries', async (req, res, next) => {
   }
 });
 
-app.get('/api/countries/:cityId', async (req, res, next) => {
+app.get('/api/cities/:cityId', async (req, res, next) => {
   try {
     const { cityId } = req.params;
     if (!Number(cityId)) {
-      throw new ClientError(400, 'cityId is required');
+      throw new ClientError(400, 'cityId is required to be a positive integer');
     }
 
     const sql = `
-     select
-        *
-      from "cities"
-      where "cityId" = $1;
-    `;
+  SELECT
+    "cities".*,
+    "cities"."name" AS "city",
+    "countries"."name" AS "country"
+  FROM "cities"
+  JOIN "countries" USING ("countryId")
+  WHERE "cityId" = $1;
+`;
 
     const params = [cityId];
     const result = await db.query(sql, params);
