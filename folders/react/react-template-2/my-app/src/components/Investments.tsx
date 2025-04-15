@@ -6,7 +6,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DollarSign } from "lucide-react";
 import { useState, useEffect } from 'react';
 
-const Investments = () => {
+interface InvestmentsProps {
+  data: any[];
+}
+
+const Investments = ({ data }: InvestmentsProps) => {
   const isDesktop = useMediaQuery('(min-width: 1024px)');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -42,7 +46,7 @@ const Investments = () => {
     );
   }
 
-  return isDesktop ? <InvestmentsDesktop /> : <InvestmentsMobile />;
+  return isDesktop ? <InvestmentsDesktop data={data} /> : <InvestmentsMobile data={data} />;
 };
 
 export default Investments; 

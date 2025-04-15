@@ -14,10 +14,45 @@ import {
 } from 'recharts';
 import { Button } from '@/components/ui/button';
 import Investments from '@/components/Investments';
+import { useEffect, useState } from 'react';
+import { initializeSampleData, getSpendingData, getInvestmentsData } from '@/lib/csv-storage';
 
 const Dashboard = () => {
+  const [spendingData, setSpendingData] = useState<any[]>([]);
+  const [investmentsData, setInvestmentsData] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Initialize sample data
+    initializeSampleData();
+    
+    // Load data from localStorage
+    const investments = getInvestmentsData();
+    const spending = getSpendingData();
+
+    if (investments.length === 0) {
+      // If no data, initialize again and reload
+      initializeSampleData();
+      setInvestmentsData(getInvestmentsData());
+    } else {
+      setInvestmentsData(investments);
+    }
+
+    if (spending.length === 0) {
+      setSpendingData(getSpendingData());
+    } else {
+      setSpendingData(spending);
+    }
+  }, []);
+
+  // Calculate spending metrics from data
+  const totalSpent = spendingData.reduce((sum, item) => sum + Number(item.amount), 0);
+  const topCategory = spendingData.reduce((max, item) => 
+    Number(item.amount) > Number(max.amount) ? item : max, 
+    { category: '', amount: 0 }
+  );
+
   return (
-    <div className="p-4">
+    <div className="p-4 min-h-screen">
       <Tabs defaultValue="spending" className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="spending">Spending</TabsTrigger>
@@ -25,12 +60,12 @@ const Dashboard = () => {
           <TabsTrigger value="taxes">Taxes</TabsTrigger>
         </TabsList>
 
-        <div className="relative min-h-[800px]">
-          <TabsContent value="spending" className="absolute inset-0">
+        <div className="relative">
+          <TabsContent value="spending">
             <div className="space-y-6">
-              <Card className="h-[420px]">
-                <CardContent className="p-4 h-full flex flex-col justify-between">
-                  <div className="flex justify-between items-center">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-semibold">
                       Monthly Spending Trend
                     </h2>
@@ -46,93 +81,124 @@ const Dashboard = () => {
                       </Button>
                     </div>
                   </div>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={[
-                        { month: 'Jan 2023', amount: 1200 },
-                        { month: 'Feb 2023', amount: 980 },
-                        { month: 'Mar 2023', amount: 1450 },
-                        { month: 'Apr 2023', amount: 1300 },
-                        { month: 'May 2023', amount: 1100 },
-                        { month: 'Jun 2023', amount: 950 },
-                        { month: 'Jul 2023', amount: 1200 },
-                        { month: 'Aug 2023', amount: 1600 },
-                        { month: 'Sep 2023', amount: 1700 },
-                        { month: 'Oct 2023', amount: 1800 },
-                        { month: 'Nov 2023', amount: 1900 },
-                        { month: 'Dec 2023', amount: 2100 },
-                        { month: 'Jan 2024', amount: 2200 },
-                        { month: 'Feb 2024', amount: 2400 },
-                        { month: 'Mar 2024', amount: 2300 },
-                        { month: 'Apr 2024', amount: 2250 },
-                        { month: 'May 2024', amount: 2100 },
-                        { month: 'Jun 2024', amount: 2500 },
-                      ]}>
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip />
-                      <Line
-                        type="monotone"
-                        dataKey="amount"
-                        stroke="#8884d8"
-                        strokeWidth={2}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart 
+                        data={spendingData}
+                        margin={{ top: 20, right: 30, left: 40, bottom: 20 }}
+                      >
+                        <XAxis dataKey="date" />
+                        <YAxis
+                          tickFormatter={(value) => `$${value}`}
+                          domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.2)]}
+                        />
+                        <Tooltip formatter={(value) => [`$${value}`, 'Amount']} />
+                        <Line
+                          type="monotone"
+                          dataKey="amount"
+                          stroke="#8884d8"
+                          strokeWidth={2}
+                          name="Amount"
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-                <Card>
-                  <CardContent className="p-4">
-                    <p className="text-sm text-muted-foreground">
-                      Top Category
-                    </p>
-                    <h3 className="text-xl font-semibold">Dining Out</h3>
-                    <p className="text-green-600">-$540 this month</p>
-                  </CardContent>
-                </Card>
 
-                <Card className="h-full">
-                  <CardContent className="p-4 h-full flex flex-col">
-                    <div>
-                      <p className="text-sm text-muted-foreground">
+              {/* Grid layout for metrics and additional charts */}
+              <div className="grid grid-cols-12 gap-6">
+                {/* Main content area */}
+                <div className="col-span-8 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <Card>
+                      <CardContent className="p-4">
+                        <p className="text-sm text-muted-foreground">
+                          Top Category
+                        </p>
+                        <h3 className="text-xl font-semibold">{topCategory.category}</h3>
+                        <p className="text-green-600">-${topCategory.amount} this month</p>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardContent className="p-4">
+                        <p className="text-sm text-muted-foreground">
+                          Remaining Budget
+                        </p>
+                        <h3 className="text-xl font-bold text-green-700">${4000 - totalSpent}</h3>
+                        <p className="text-xs text-muted-foreground">
+                          Out of $4,000
+                        </p>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardContent className="p-4">
+                        <p className="text-sm text-muted-foreground">
+                          Total Transactions
+                        </p>
+                        <h3 className="text-xl font-bold">{spendingData.length}</h3>
+                        <p className="text-xs text-muted-foreground">
+                          This month
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Placeholder for additional charts */}
+                  <Card>
+                    <CardContent className="p-6">
+                      <h3 className="text-lg font-semibold mb-2">Category Breakdown</h3>
+                      <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                        Category distribution chart coming soon
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Sidebar area */}
+                <div className="col-span-4 space-y-6">
+                  <Card>
+                    <CardContent className="p-4">
+                      <p className="text-sm text-muted-foreground mb-2">
                         AI Insight
                       </p>
-                      <p className="text-sm italic">
-                        "You spent 32% more on subscriptions this month than
-                        last month."
+                      <p className="text-sm italic mb-4">
+                        "You spent ${totalSpent} this month across {spendingData.length} transactions."
                       </p>
-                    </div>
-                    <div className="flex justify-center mt-auto -mb-3">
-                      <Button variant="outline" size="sm" asChild>
+                      <Button variant="outline" size="sm" className="w-full" asChild>
                         <a href="/ai-insights">Explore AI Insights →</a>
                       </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
 
-                <Card>
-                  <CardContent className="p-4">
-                    <p className="text-sm text-muted-foreground">
-                      Remaining Budget
-                    </p>
-                    <h3 className="text-xl font-bold text-green-700">$2,850</h3>
-                    <p className="text-xs text-muted-foreground">
-                      Out of $4,000
-                    </p>
-                  </CardContent>
-                </Card>
+                  {/* Placeholder for additional widgets */}
+                  <Card>
+                    <CardContent className="p-4">
+                      <h3 className="text-lg font-semibold mb-2">Quick Actions</h3>
+                      <div className="space-y-2">
+                        <Button variant="outline" size="sm" className="w-full">
+                          Add Transaction
+                        </Button>
+                        <Button variant="outline" size="sm" className="w-full">
+                          Set Budget
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </div>
           </TabsContent>
 
-          <TabsContent value="investments" className="absolute inset-0">
+          <TabsContent value="investments">
             <div className="space-y-6">
-              <Investments />
+              <Investments data={investmentsData} />
             </div>
           </TabsContent>
 
-          <TabsContent value="taxes" className="absolute inset-0">
+          <TabsContent value="taxes">
             <div className="space-y-6">
               <Card>
                 <CardContent className="p-4">

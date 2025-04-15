@@ -19,7 +19,14 @@ import { Progress } from '@/components/ui/progress';
 import InvestmentWidgets from './InvestmentWidgets';
 import { Spotlight } from "@/components/ui/spotlight";
 
-const InvestmentsMobile = () => {
+interface InvestmentsMobileProps {
+  data: any[];
+}
+
+const InvestmentsMobile = ({ data }: InvestmentsMobileProps) => {
+  // Calculate latest values from data
+  const latestData = data[data.length - 1] || { value: 0, return: 0 };
+  
   return (
     <div className="flex flex-col gap-4">
       {/* Key Metrics */}
@@ -30,7 +37,7 @@ const InvestmentsMobile = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Value</p>
-                <h3 className="text-2xl font-bold">$125,430.00</h3>
+                <h3 className="text-2xl font-bold">${latestData.value}</h3>
               </div>
               <DollarSign className="h-5 w-5 text-muted-foreground" />
             </div>
@@ -128,56 +135,35 @@ const InvestmentsMobile = () => {
       {/* Performance Chart */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-lg font-semibold">Performance</h3>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Performance</h2>
             <div className="space-x-2">
-              <Button variant="outline" size="sm">1D</Button>
-              <Button variant="outline" size="sm">7D</Button>
-              <Button variant="outline" size="sm">30D</Button>
-              <Button variant="outline" size="sm">1Y</Button>
+              <Button variant="outline" size="sm">
+                1D
+              </Button>
+              <Button variant="outline" size="sm">
+                7D
+              </Button>
+              <Button variant="outline" size="sm">
+                30D
+              </Button>
             </div>
           </div>
-          <div className="h-[200px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={[
-                  { month: 'Jan', value: 85000 },
-                  { month: 'Feb', value: 88000 },
-                  { month: 'Mar', value: 92000 },
-                  { month: 'Apr', value: 95000 },
-                  { month: 'May', value: 98000 },
-                  { month: 'Jun', value: 100000 },
-                ]}>
-                <XAxis 
-                  dataKey="month" 
-                  tick={{ fill: '#666' }}
-                  axisLine={{ stroke: '#ddd' }}
-                />
-                <YAxis 
-                  tick={{ fill: '#666' }}
-                  axisLine={{ stroke: '#ddd' }}
-                  tickFormatter={(value) => `$${(value / 1000)}k`}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'white',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                  }}
-                  formatter={(value: number) => [`$${value.toLocaleString()}`, 'Value']}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  stroke="#8884d8"
-                  strokeWidth={2}
-                  dot={{ fill: '#8884d8', r: 4 }}
-                  activeDot={{ fill: '#8884d8', r: 6, stroke: '#fff', strokeWidth: 2 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke="#8884d8"
+                strokeWidth={2}
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
 
