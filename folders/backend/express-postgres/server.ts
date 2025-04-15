@@ -3,8 +3,6 @@ import { ClientError, errorMiddleware } from './lib/index.js';
 
 import pg from 'pg';
 
-pg.types.setTypeParser(pg.types.builtins.NUMERIC, parseFloat);
-
 const db = new pg.Pool({
   connectionString: 'postgres://dev:dev@localhost/pagila',
   ssl: { rejectUnauthorized: false },
@@ -20,9 +18,7 @@ app.get('/api/actors/:actorId', async (req, res, next) => {
     }
     const sql = `
       select
-        "actorId",
-        "firstName",
-        "lastName"
+        *
       from "actors"
       where "actorId" = $1;
     `;
@@ -41,7 +37,7 @@ app.get('/api/actors/:actorId', async (req, res, next) => {
 app.get('/api/films', async (req, res, next) => {
   try {
     const sql = `
-      SELECT "filmId", "title", "replacementCost"
+      SELECT *
       FROM "films"
       ORDER BY "replacementCost" DESC;
     `;
@@ -55,16 +51,18 @@ app.get('/api/films', async (req, res, next) => {
 app.get('/api/films/:filmId', async (req, res, next) => {
   try {
     const { filmId } = req.params;
+    if (!Number(filmId)) {
+      throw new ClientError(400, `filmId must be a positive integer`);
+    }
     const sql = `
-      SELECT "filmId", "title", "description"
+      SELECT *
       FROM "films"
       WHERE "filmId" = $1;
     `;
     const result = await db.query(sql, [filmId]);
     const film = result.rows[0];
     if (!film) {
-      res.status(404).send(`Film with id ${filmId} not found`);
-      return;
+      throw new ClientError(404, `Film with id ${filmId} not found`);
     }
     res.send(film);
   } catch (err) {
@@ -78,8 +76,7 @@ app.put('/api/films/:filmId', async (req, res, next) => {
     const { title } = req.query;
 
     if (!title) {
-      res.status(400).send('Missing title query param');
-      return;
+      throw new ClientError(400, 'Missing title query param');
     }
 
     const sql = `
@@ -92,8 +89,7 @@ app.put('/api/films/:filmId', async (req, res, next) => {
     const updatedFilm = result.rows[0];
 
     if (!updatedFilm) {
-      res.status(404).send(`Film with id ${filmId} not found`);
-      return;
+      throw new ClientError(404, `Film with id ${filmId} not found`);
     }
 
     res.send(updatedFilm);
