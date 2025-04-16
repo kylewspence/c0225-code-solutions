@@ -1,235 +1,176 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { DollarSign, TrendingUp, AlertTriangle, Clock, Upload, Download } from "lucide-react";
-import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, Tooltip } from 'recharts';
-import { Spotlight } from "@/components/ui/spotlight";
-import InvestmentWidgets from './InvestmentWidgets';
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { getInvestmentsData } from '@/lib/csv-storage';
 
-interface Asset {
-  name: string;
-  sector: string;
-  shares: string;
-  price: string;
-  value: string;
-}
-
-interface InvestmentData {
-  id: string;
+interface Investment {
   date: string;
-  value: string;
-  return: string;
-  assets: Asset[];
+  symbol: string;
+  shares: number;
+  price: number;
+  currentPrice?: number;
+  value?: number;
+  change?: number;
 }
 
-interface InvestmentsDesktopProps {
-  data: InvestmentData[];
-}
+const sampleData: Investment[] = [
+  { date: '2024-03-01', symbol: 'AAPL', shares: 10, price: 170.73 },
+  { date: '2024-03-01', symbol: 'MSFT', shares: 5, price: 415.32 },
+  { date: '2024-03-01', symbol: 'GOOGL', shares: 3, price: 142.56 },
+  { date: '2024-03-01', symbol: 'AMZN', shares: 2, price: 178.75 },
+  { date: '2024-03-01', symbol: 'META', shares: 4, price: 485.96 },
+];
 
-const InvestmentsDesktop = ({ data }: InvestmentsDesktopProps) => {
-  // Calculate metrics from data with proper error handling
-  const latestData = data?.[data.length - 1] || { value: '0', return: '0', assets: [] };
-  const firstData = data?.[0] || { value: '0', return: '0', assets: [] };
-  
-  // Ensure we have valid numbers for calculations
-  const latestValue = Number(latestData.value) || 0;
-  const firstValue = Number(firstData.value) || 0;
-  const latestReturn = Number(latestData.return) || 0;
-  
-  // Calculate YTD return
-  const ytdReturn = ((latestValue - firstValue) / firstValue) * 100;
-  
-  // Calculate risk level based on return volatility
-  const returns = data.map(d => Number(d.return) || 0);
-  const avgReturn = returns.reduce((a, b) => a + b, 0) / returns.length;
-  const variance = returns.reduce((a, b) => a + Math.pow(b - avgReturn, 2), 0) / returns.length;
-  const stdDev = Math.sqrt(variance);
-  
-  let riskLevel = 'Low';
-  if (stdDev > 15) riskLevel = 'High';
-  else if (stdDev > 8) riskLevel = 'Medium';
-  
-  // Prepare data for charts
-  const performanceData = data.map(d => ({
-    date: d.date,
-    value: Number(d.value) || 0,
-    return: Number(d.return) || 0
-  }));
-  
-  const assetData = latestData.assets.map(asset => ({
-    name: asset.name,
-    value: Number(asset.value) || 0,
-    sector: asset.sector
-  }));
-  
-  // Calculate sector distribution
-  const sectorData = assetData.reduce((acc: Record<string, number>, asset) => {
-    acc[asset.sector] = (acc[asset.sector] || 0) + asset.value;
-    return acc;
-  }, {});
-  
-  const pieData = Object.entries(sectorData).map(([name, value]) => ({
-    name,
-    value
-  }));
-  
-  // Get sector color
-  function getSectorColor(sector: string) {
-    const colors: Record<string, string> = {
-      'Technology': '#0088FE',
-      'Healthcare': '#00C49F',
-      'Finance': '#FFBB28',
-      'Energy': '#FF8042',
-      'Consumer': '#8884D8',
-      'Industrial': '#82CA9D',
-      'Materials': '#FFC658',
-      'Utilities': '#8DD1E1',
-      'Real Estate': '#A4DE6C',
-      'Communication': '#D0ED57',
+const InvestmentsDesktop = () => {
+  const [investments, setInvestments] = useState<Investment[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = getInvestmentsData();
+        if (data && data.length > 0) {
+          // Convert string values to numbers and ensure proper formatting
+          const formattedData = data.map((item: Investment) => ({
+            ...item,
+            shares: parseFloat(item.shares.toString()) || 0,
+            price: parseFloat(item.price.toString()) || 0,
+          }));
+          setInvestments(formattedData);
+        } else {
+          setInvestments(sampleData);
+        }
+      } catch (error) {
+        console.error('Error loading investment data:', error);
+        setInvestments(sampleData);
+      } finally {
+        setLoading(false);
+      }
     };
-    return colors[sector] || '#8884D8';
+
+    loadData();
+
+    const handleDataUpdate = () => {
+      loadData();
+    };
+
+    window.addEventListener('storage', handleDataUpdate);
+    window.addEventListener('investmentsDataUpdated', handleDataUpdate);
+    
+    return () => {
+      window.removeEventListener('storage', handleDataUpdate);
+      window.removeEventListener('investmentsDataUpdated', handleDataUpdate);
+    };
+  }, []);
+
+  const calculateTotalValue = (investments: Investment[]) => {
+    return investments.reduce((total, investment) => {
+      const value = investment.shares * investment.price;
+      return total + (isNaN(value) ? 0 : value);
+    }, 0);
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  };
+
+  const formatPercentage = (value: number) => {
+    return `${value.toFixed(2)}%`;
+  };
+
+  const handleSymbolClick = async (symbol: string) => {
+    // TODO: Implement API call to get detailed stock information
+    console.log('Fetching details for:', symbol);
+  };
+
+  if (loading) {
+    return (
+      <Card className="p-6">
+        <CardHeader>
+          <CardTitle>Loading investments...</CardTitle>
+        </CardHeader>
+      </Card>
+    );
   }
 
   return (
     <div className="space-y-6">
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Value</p>
-                <h3 className="text-2xl font-bold">${latestValue.toLocaleString()}</h3>
-                <p className="text-sm text-muted-foreground">As of {latestData.date}</p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <DollarSign className="h-6 w-6 text-primary" />
-              </div>
+          <CardHeader className="py-4">
+            <CardTitle className="text-sm font-medium">Total Portfolio Value</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {formatCurrency(calculateTotalValue(investments))}
             </div>
           </CardContent>
         </Card>
-        
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">YTD Return</p>
-                <div className="flex items-center">
-                  <h3 className="text-2xl font-bold">{ytdReturn.toFixed(2)}%</h3>
-                  {ytdReturn >= 0 ? (
-                    <TrendingUp className="h-5 w-5 text-green-500 ml-2" />
-                  ) : (
-                    <AlertTriangle className="h-5 w-5 text-red-500 ml-2" />
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground">Year to Date</p>
-              </div>
-            </div>
+          <CardHeader className="py-4">
+            <CardTitle className="text-sm font-medium">Risk Level</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">Moderate</div>
           </CardContent>
         </Card>
-        
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Risk Level</p>
-                <h3 className="text-2xl font-bold">{riskLevel}</h3>
-                <p className="text-sm text-muted-foreground">Based on volatility</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Last Updated</p>
-                <h3 className="text-2xl font-bold">{new Date().toLocaleDateString()}</h3>
-                <p className="text-sm text-muted-foreground">Today</p>
-              </div>
-              <Clock className="h-6 w-6 text-muted-foreground" />
+          <CardHeader className="py-4">
+            <CardTitle className="text-sm font-medium">Last Updated</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {new Date().toLocaleDateString()}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Main Content Area */}
-      <div className="grid lg:grid-cols-12 gap-4">
-        <div className="lg:col-span-8 space-y-4">
-          {/* Asset Allocation */}
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Asset Allocation</h3>
-              <div className="h-[150px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={60}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+      <Card className="p-6">
+        <CardHeader>
+          <CardTitle>Investment Holdings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Symbol</TableHead>
+                  <TableHead>Shares</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Value</TableHead>
+                  <TableHead>Change</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {investments.map((investment, index) => {
+                  const value = investment.shares * investment.price;
+                  return (
+                    <TableRow 
+                      key={index}
+                      className="cursor-pointer hover:bg-gray-50"
+                      onClick={() => handleSymbolClick(investment.symbol)}
                     >
-                      {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={getSectorColor(entry.name)} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Performance Chart */}
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Performance</h3>
-              <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={performanceData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="value"
-                      stroke="#8884d8"
-                      strokeWidth={2}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sidebar */}
-        <div className="lg:col-span-4 space-y-4">
-          <InvestmentWidgets />
-          
-          {/* Quick Actions */}
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-              <div className="space-y-2">
-                <Button className="w-full" variant="outline">
-                  <Upload className="mr-2 h-4 w-4" />
-                  Upload Statement
-                </Button>
-                <Button className="w-full" variant="outline">
-                  <Download className="mr-2 h-4 w-4" />
-                  Export Data
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+                      <TableCell className="font-medium">{investment.symbol}</TableCell>
+                      <TableCell>{investment.shares}</TableCell>
+                      <TableCell>{formatCurrency(investment.price)}</TableCell>
+                      <TableCell>{formatCurrency(value)}</TableCell>
+                      <TableCell className={investment.change && investment.change > 0 ? 'text-green-500' : 'text-red-500'}>
+                        {investment.change ? formatPercentage(investment.change) : 'N/A'}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

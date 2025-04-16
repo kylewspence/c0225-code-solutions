@@ -1,83 +1,40 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import Investments from '@/components/Investments';
-import Spending from '../components/Spending';
-import FileUploadSheet from '@/components/FileUploadSheet';
-import { exportInvestmentsData, exportSpendingData, downloadCSV, getInvestmentsData } from '@/lib/csv-storage';
-import { useToast } from '@/components/ui/use-toast';
 import { useState } from 'react';
-import { Toaster } from '@/components/ui/toaster';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card } from '@/components/ui/card';
+import { useToast } from '@/components/ui/use-toast';
+import FileUploadSheet from '@/components/FileUploadSheet';
+import Spending from '@/components/Spending';
+import InvestmentsDesktop from '@/components/InvestmentsDesktop';
+import MonthlyTransactions from '@/components/MonthlyTransactions';
+import TokenCounter from '@/components/TokenCounter';
 
 const Dashboard = () => {
   const { toast } = useToast();
-  const [isUploadOpen, setIsUploadOpen] = useState(false);
-  const [uploadType, setUploadType] = useState<'investments' | 'spending'>('investments');
-  const investmentsData = getInvestmentsData();
-
-  const handleExport = (type: 'investments' | 'spending') => {
-    const data = type === 'investments' ? exportInvestmentsData() : exportSpendingData();
-    downloadCSV(data, `${type}-data.csv`);
-    toast({
-      title: 'Export Successful',
-      description: `Your ${type} data has been exported.`,
-    });
-  };
-
-  const handleUploadSuccess = () => {
-    toast({
-      title: `${uploadType === 'investments' ? 'Investments' : 'Spending'} Data Updated`,
-      description: `Your ${uploadType} data has been successfully updated.`,
-    });
-    setIsUploadOpen(false);
-  };
-
-  const handleCancel = () => {
-    setIsUploadOpen(false);
-  };
+  const [activeTab, setActiveTab] = useState('spending');
 
   return (
-    <div className="container mx-auto py-6">
-      <Tabs defaultValue="investments" className="space-y-4">
-        <div className="flex items-center justify-between">
-          <TabsList>
-            <TabsTrigger value="investments">Investments</TabsTrigger>
-            <TabsTrigger value="spending">Spending</TabsTrigger>
-          </TabsList>
-          <div className="space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setUploadType('investments');
-                setIsUploadOpen(true);
-              }}
-            >
-              Upload Investments
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setUploadType('spending');
-                setIsUploadOpen(true);
-              }}
-            >
-              Upload Spending
-            </Button>
-          </div>
-        </div>
-        <TabsContent value="investments">
-          <Investments data={investmentsData} />
+    <div className="flex-1 space-y-6 p-6 md:p-8 pt-6">
+      <TokenCounter />
+      <div className="flex items-center justify-between space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <FileUploadSheet />
+      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="spending">Spending</TabsTrigger>
+          <TabsTrigger value="investments">Investments</TabsTrigger>
+          <TabsTrigger value="transactions">Transactions</TabsTrigger>
+        </TabsList>
+        <TabsContent value="spending" className="space-y-6">
+          <Spending />
         </TabsContent>
-        <TabsContent value="spending">
-          <Spending onExport={() => handleExport('spending')} />
+        <TabsContent value="investments" className="space-y-6">
+          <InvestmentsDesktop />
+        </TabsContent>
+        <TabsContent value="transactions" className="space-y-6">
+          <MonthlyTransactions />
         </TabsContent>
       </Tabs>
-      <FileUploadSheet
-        isOpen={isUploadOpen}
-        onClose={handleCancel}
-        onSuccess={handleUploadSuccess}
-        type={uploadType}
-      />
-      <Toaster />
     </div>
   );
 };
