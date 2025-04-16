@@ -84,70 +84,43 @@ export const getInvestmentsData = (): Investment[] => {
   });
 };
 
-export const getSpendingData = async () => {
-  const data = localStorage.getItem(STORAGE_KEY);
-  if (!data) return [];
+// Generic CSV parser
+const parseCSV = (csv: string, headerValidation?: (headers: string[]) => number) => {
+  const lines = csv.trim().split('\n');
+  if (lines.length < 2) return [];
   
-  try {
-    const parsedData = JSON.parse(data);
-    const mappedData = parsedData
-      .filter((item: any) => item['Transaction Date'] && item['Amount'])
-      .map((item: any) => {
-        const rawAmount = item['Amount'].replace(/[^0-9.-]/g, '');
-        let amount = parseFloat(rawAmount);
-        
-        // For purchases, make it positive (spending)
-        // For payments and returns, make it negative (credits)
-        if (item['Type'] === 'Payment' || item['Type'] === 'Return') {
-          amount = -Math.abs(amount);
-        } else {
-          amount = Math.abs(amount);
-        }
-        
-        return {
-          date: item['Transaction Date'],
-          description: item['Description'] || item['Post Date'] || 'No Description',
-          category: item['Category'] || 'Uncategorized',
-          amount: amount,
-          type: item['Type'] || 'Purchase'
-        };
-      });
-    
-    return mappedData;
-  } catch (error) {
-    console.error('Error parsing spending data:', error);
-    return [];
+  let headerIndex = 0;
+  if (headerValidation) {
+    headerIndex = headerValidation(lines);
   }
+  
+  const headers = lines[headerIndex].split(',').map(header => header.trim());
+  return lines.slice(headerIndex + 1)
+    .filter(line => line.trim())
+    .map(line => {
+      const values = line.split(',').map(value => value.trim().replace(/^"|"$/g, ''));
+      return headers.reduce((obj, header, i) => {
+        obj[header] = values[i] || '';
+        return obj;
+      }, {} as Record<string, string>);
+    });
+};
+
+// Validate spending data headers
+const validateSpendingHeaders = (lines: string[]): number => {
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].includes('Transaction Date') && lines[i].includes('Amount')) {
+      return i;
+    }
+  }
+  throw new Error('Invalid spending data format');
 };
 
 export const updateSpendingData = (newData: string) => {
   try {
-    const lines = newData.trim().split('\n');
-    
-    // Skip any header rows that don't match our expected format
-    let headerIndex = 0;
-    for (let i = 0; i < lines.length; i++) {
-      if (lines[i].includes('Transaction Date') && lines[i].includes('Amount')) {
-        headerIndex = i;
-        break;
-      }
-    }
-    
-    const headers = lines[headerIndex].split(',').map(header => header.trim());
-    
-    // Parse the CSV data starting after the headers
-    const parsedData = lines.slice(headerIndex + 1)
-      .filter(line => line.trim())
-      .map(line => {
-        const values = line.split(',').map(value => value.trim().replace(/^"|"$/g, ''));
-        const row: Record<string, string> = {};
-        headers.forEach((header, i) => {
-          row[header] = values[i] || '';
-        });
-        return row;
-      });
-
+    const parsedData = parseCSV(newData, validateSpendingHeaders);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(parsedData));
+    window.dispatchEvent(new Event('spendingDataUpdated'));
   } catch (error) {
     console.error('Error parsing spending data:', error);
     throw new Error('Failed to parse spending data');
@@ -157,19 +130,42 @@ export const updateSpendingData = (newData: string) => {
 export const updateInvestmentsData = (newData: string) => {
   const parsedData = parseCSV(newData);
   localStorage.setItem('investmentsData', JSON.stringify(parsedData));
+  window.dispatchEvent(new Event('investmentsDataUpdated'));
 };
 
-const parseCSV = (csv: string) => {
-  const lines = csv.trim().split('\n');
-  const headers = lines[0].split(',').map(header => header.trim());
+// Standardize transaction processing
+const processTransaction = (item: Record<string, string>): Transaction => {
+  const rawAmount = item['Amount']?.replace(/[^0-9.-]/g, '') || '0';
+  let amount = parseFloat(rawAmount);
   
-  return lines.slice(1).map(line => {
-    const values = line.split(',').map(value => value.trim());
-    return headers.reduce((obj, header, i) => {
-      obj[header] = values[i] || '';
-      return obj;
-    }, {} as Record<string, string>);
-  });
+  if (item['Type'] === 'Payment' || item['Type'] === 'Return') {
+    amount = -Math.abs(amount);
+  } else {
+    amount = Math.abs(amount);
+  }
+  
+  return {
+    date: item['Transaction Date'] || new Date().toLocaleDateString(),
+    description: item['Description'] || item['Post Date'] || 'No Description',
+    category: item['Category'] || 'Uncategorized',
+    amount,
+    type: (item['Type'] as 'Payment' | 'Return' | 'Purchase') || 'Purchase'
+  };
+};
+
+export const getSpendingData = async () => {
+  const data = localStorage.getItem(STORAGE_KEY);
+  if (!data) return [];
+  
+  try {
+    const parsedData = JSON.parse(data);
+    return parsedData
+      .filter((item: Record<string, string>) => item['Transaction Date'] && item['Amount'])
+      .map(processTransaction);
+  } catch (error) {
+    console.error('Error parsing spending data:', error);
+    return [];
+  }
 };
 
 export function exportInvestmentsData(): string {

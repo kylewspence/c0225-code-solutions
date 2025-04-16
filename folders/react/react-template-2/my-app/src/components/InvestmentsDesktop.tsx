@@ -1,69 +1,59 @@
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { formatCurrency } from '@/lib/utils';
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
-import { AlertCircle, Home, TrendingUp, RefreshCw } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Investment, StockInvestment, PropertyInvestment, investmentService } from '@/lib/investment-service';
+import { RefreshCw } from 'lucide-react';
+import { formatCurrency, formatPercentage, useDataLoader } from '@/lib/utils';
+import { Investment, PropertyInvestment, StockInvestment } from '@/types/investment';
+import { investmentService } from '@/lib/investment-service';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
+const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
 const STOCK_SECTORS: Record<string, string> = {
   AAPL: 'Technology',
   MSFT: 'Technology',
   GOOGL: 'Technology',
-  AMZN: 'Consumer Cyclical',
+  AMZN: 'Consumer',
   NVDA: 'Technology'
 };
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
-
 const InvestmentsDesktop = () => {
-  const [investments, setInvestments] = useState<Investment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const { data: investments, loading, refresh, refreshing } = useDataLoader(
+    investmentService.getInvestments,
+    [],
+    ['investmentsDataUpdated']
+  );
 
-  const loadData = async () => {
-    try {
-      setRefreshing(true);
-      const data = await investmentService.getInvestments();
-      setInvestments(data);
-    } catch (error) {
-      console.error('Error loading investment data:', error);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
+  const calculations = useMemo(() => {
+    if (!investments) return {
+      totalValue: 0,
+      netRealEstateValue: 0,
+      monthlyRealEstateIncome: 0,
+      assetAllocation: []
+    };
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const calculateTotalValue = () => {
-    return investments.reduce((total, investment) => total + investment.value, 0);
-  };
-
-  const calculateNetRealEstateValue = () => {
-    return investments
+    const totalValue = investments.reduce((total, investment) => total + investment.value, 0);
+    
+    const netRealEstateValue = investments
       .filter((inv): inv is PropertyInvestment => inv.type === 'property')
-      .reduce((total, property) => {
-        const equity = property.currentValue - property.mortgage;
-        return total + equity;
-      }, 0);
-  };
-
-  const calculateMonthlyRealEstateIncome = () => {
-    return investments
+      .reduce((total, property) => total + (property.currentValue - property.mortgage), 0);
+    
+    const monthlyRealEstateIncome = investments
       .filter((inv): inv is PropertyInvestment => inv.type === 'property')
       .reduce((total, property) => {
         const monthlyIncome = property.monthlyRent - property.expenses;
-        const monthlyMortgage = property.mortgage * (property.rate / 1200); // Convert annual rate to monthly
+        const monthlyMortgage = property.mortgage * (property.rate / 1200);
         return total + monthlyIncome - monthlyMortgage;
       }, 0);
-  };
-
-  const calculateAssetAllocation = () => {
+    
     const stockValue = investments
       .filter(inv => inv.type === 'stock')
       .reduce((total, stock) => total + stock.value, 0);
@@ -72,15 +62,22 @@ const InvestmentsDesktop = () => {
       .filter(inv => inv.type === 'property')
       .reduce((total, property) => total + property.value, 0);
 
-    return [
+    const assetAllocation = [
       { name: 'Stocks', value: stockValue },
       { name: 'Real Estate', value: realEstateValue }
     ];
-  };
+
+    return {
+      totalValue,
+      netRealEstateValue,
+      monthlyRealEstateIncome,
+      assetAllocation
+    };
+  }, [investments]);
 
   if (loading) {
     return (
-      <Card className="p-6">
+      <Card>
         <CardHeader>
           <CardTitle>Loading investments...</CardTitle>
         </CardHeader>
@@ -88,18 +85,13 @@ const InvestmentsDesktop = () => {
     );
   }
 
-  const totalValue = calculateTotalValue();
-  const netRealEstateValue = calculateNetRealEstateValue();
-  const monthlyRealEstateIncome = calculateMonthlyRealEstateIncome();
-  const assetAllocation = calculateAssetAllocation();
-
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
         <Button
           variant="outline"
           size="sm"
-          onClick={loadData}
+          onClick={refresh}
           disabled={refreshing}
         >
           <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
@@ -114,7 +106,7 @@ const InvestmentsDesktop = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatCurrency(totalValue)}
+              {formatCurrency(calculations.totalValue)}
             </div>
           </CardContent>
         </Card>
@@ -125,7 +117,7 @@ const InvestmentsDesktop = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatCurrency(netRealEstateValue)}
+              {formatCurrency(calculations.netRealEstateValue)}
             </div>
           </CardContent>
         </Card>
@@ -136,7 +128,7 @@ const InvestmentsDesktop = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatCurrency(monthlyRealEstateIncome)}
+              {formatCurrency(calculations.monthlyRealEstateIncome)}
             </div>
           </CardContent>
         </Card>
@@ -151,7 +143,7 @@ const InvestmentsDesktop = () => {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={assetAllocation}
+                  data={calculations.assetAllocation}
                   dataKey="value"
                   nameKey="name"
                   cx="50%"
@@ -159,7 +151,7 @@ const InvestmentsDesktop = () => {
                   outerRadius={100}
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 >
-                  {assetAllocation.map((entry, index) => (
+                  {calculations.assetAllocation.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -170,16 +162,10 @@ const InvestmentsDesktop = () => {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="stocks" className="space-y-4">
+      <Tabs defaultValue="stocks">
         <TabsList>
-          <TabsTrigger value="stocks">
-            <TrendingUp className="h-4 w-4 mr-2" />
-            Stocks
-          </TabsTrigger>
-          <TabsTrigger value="properties">
-            <Home className="h-4 w-4 mr-2" />
-            Properties
-          </TabsTrigger>
+          <TabsTrigger value="stocks">Stocks</TabsTrigger>
+          <TabsTrigger value="properties">Properties</TabsTrigger>
         </TabsList>
 
         <TabsContent value="stocks">
@@ -195,14 +181,13 @@ const InvestmentsDesktop = () => {
                       <TableHead>Symbol</TableHead>
                       <TableHead>Sector</TableHead>
                       <TableHead>Shares</TableHead>
-                      <TableHead>Price</TableHead>
+                      <TableHead>Current Price</TableHead>
                       <TableHead>Value</TableHead>
                       <TableHead>Change</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {investments
-                      .filter((inv): inv is StockInvestment => inv.type === 'stock')
+                    {investments?.filter((inv): inv is StockInvestment => inv.type === 'stock')
                       .map((stock) => (
                         <TableRow key={stock.id} className="hover:bg-gray-50">
                           <TableCell className="font-medium">{stock.symbol}</TableCell>
@@ -211,7 +196,7 @@ const InvestmentsDesktop = () => {
                           <TableCell>{formatCurrency(stock.currentPrice)}</TableCell>
                           <TableCell>{formatCurrency(stock.value)}</TableCell>
                           <TableCell className={stock.change > 0 ? 'text-green-500' : 'text-red-500'}>
-                            {stock.change.toFixed(2)}%
+                            {formatPercentage(stock.change)}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -241,8 +226,7 @@ const InvestmentsDesktop = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {investments
-                      .filter((inv): inv is PropertyInvestment => inv.type === 'property')
+                    {investments?.filter((inv): inv is PropertyInvestment => inv.type === 'property')
                       .map((property) => {
                         const equity = property.currentValue - property.mortgage;
                         const monthlyIncome = property.monthlyRent - property.expenses;
@@ -258,7 +242,7 @@ const InvestmentsDesktop = () => {
                             <TableCell>{formatCurrency(equity)}</TableCell>
                             <TableCell>{formatCurrency(netMonthlyIncome)}</TableCell>
                             <TableCell className={annualROI > 0 ? 'text-green-500' : 'text-red-500'}>
-                              {annualROI.toFixed(1)}%
+                              {formatPercentage(annualROI)}
                             </TableCell>
                           </TableRow>
                         );
