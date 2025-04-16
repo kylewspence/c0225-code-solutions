@@ -1,56 +1,118 @@
+import { Transaction } from '@/types/transaction';
+
+export interface Investment {
+  type: 'stock' | 'property';
+  date: string;
+  // Stock specific fields
+  symbol?: string;
+  shares?: number;
+  price?: number;
+  currentPrice?: number;
+  // Property specific fields
+  propertyAddress?: string;
+  purchasePrice?: number;
+  currentValue?: number;
+  mortgage?: number;
+  rate?: number;
+  monthlyRent?: number;
+  expenses?: number;
+  // Common fields
+  value?: number;
+  change?: number;
+}
+
 // Sample CSV data for investments
-const SAMPLE_INVESTMENTS_CSV = `date,value,return
-2024-01-01,100000,0
-2024-01-15,101200,1.2
-2024-02-01,102500,2.5
-2024-02-15,103800,3.8
-2024-03-01,105000,5.0
-2024-03-15,106200,6.2
-2024-04-01,107500,7.5`;
+const SAMPLE_INVESTMENTS_CSV = `type,date,symbol,shares,price,currentPrice,propertyAddress,purchasePrice,currentValue,mortgage,rate,monthlyRent,expenses
+stock,2024-01-01,AAPL,100,190.50,195.20,,,,,,,,
+stock,2024-01-01,MSFT,50,375.80,380.20,,,,,,,,
+stock,2024-01-01,GOOGL,30,140.20,142.50,,,,,,,,
+stock,2024-01-01,AMZN,40,155.30,158.40,,,,,,,,
+stock,2024-01-01,NVDA,25,480.50,490.20,,,,,,,,
+property,2024-01-01,,,,,123 Main St,450000,475000,350000,4.25,2800,800
+property,2024-01-01,,,,,456 Oak Ave,380000,395000,290000,3.75,2400,650`;
+
+const STORAGE_KEY = 'spendingData';
 
 export const initializeSampleData = () => {
-  // Check if investments data already exists
   if (localStorage.getItem('investmentsData')) {
     return;
   }
-
-  // Store the parsed investments data
-  localStorage.setItem('investmentsData', JSON.stringify(parseCSV(SAMPLE_INVESTMENTS_CSV)));
+  const parsedData = parseCSV(SAMPLE_INVESTMENTS_CSV);
+  localStorage.setItem('investmentsData', JSON.stringify(parsedData));
 };
 
-export const getInvestmentsData = () => {
+export const getInvestmentsData = (): Investment[] => {
   const data = localStorage.getItem('investmentsData');
   if (!data) {
     initializeSampleData();
     return JSON.parse(localStorage.getItem('investmentsData') || '[]');
   }
-  return JSON.parse(data);
+
+  const parsedData = JSON.parse(data);
+  return parsedData.map((item: any): Investment => {
+    if (item.type === 'stock') {
+      const price = parseFloat(item.price) || 0;
+      const shares = parseFloat(item.shares) || 0;
+      const currentPrice = parseFloat(item.currentPrice) || price;
+      return {
+        type: 'stock',
+        date: item.date || '',
+        symbol: item.symbol || '',
+        shares,
+        price,
+        currentPrice,
+        value: shares * currentPrice,
+        change: price ? ((currentPrice - price) / price) * 100 : 0
+      };
+    } else {
+      const purchasePrice = parseFloat(item.purchasePrice) || 0;
+      const currentValue = parseFloat(item.currentValue) || purchasePrice;
+      return {
+        type: 'property',
+        date: item.date || '',
+        propertyAddress: item.propertyAddress || '',
+        purchasePrice,
+        currentValue,
+        mortgage: parseFloat(item.mortgage) || 0,
+        rate: parseFloat(item.rate) || 0,
+        monthlyRent: parseFloat(item.monthlyRent) || 0,
+        expenses: parseFloat(item.expenses) || 0,
+        value: currentValue,
+        change: purchasePrice ? ((currentValue - purchasePrice) / purchasePrice) * 100 : 0
+      };
+    }
+  });
 };
 
-export const getSpendingData = () => {
-  const data = localStorage.getItem('spendingData');
+export const getSpendingData = async () => {
+  const data = localStorage.getItem(STORAGE_KEY);
   if (!data) return [];
   
   try {
     const parsedData = JSON.parse(data);
-    console.log('Retrieved data from storage:', parsedData); // Debug log
-    
-    // Map the Chase CC transaction format to our expected format
     const mappedData = parsedData
-      .filter((item: any) => item['Transaction Date'] && item['Amount']) // Ensure required fields exist
+      .filter((item: any) => item['Transaction Date'] && item['Amount'])
       .map((item: any) => {
-        // Remove currency symbols and handle negative amounts
         const rawAmount = item['Amount'].replace(/[^0-9.-]/g, '');
-        const amount = item['Type'] === 'Return' ? rawAmount : `-${Math.abs(parseFloat(rawAmount))}`;
+        let amount = parseFloat(rawAmount);
+        
+        // For purchases, make it positive (spending)
+        // For payments and returns, make it negative (credits)
+        if (item['Type'] === 'Payment' || item['Type'] === 'Return') {
+          amount = -Math.abs(amount);
+        } else {
+          amount = Math.abs(amount);
+        }
         
         return {
           date: item['Transaction Date'],
+          description: item['Description'] || item['Post Date'] || 'No Description',
           category: item['Category'] || 'Uncategorized',
-          amount: amount
+          amount: amount,
+          type: item['Type'] || 'Purchase'
         };
       });
     
-    console.log('Mapped spending data:', mappedData); // Debug log
     return mappedData;
   } catch (error) {
     console.error('Error parsing spending data:', error);
@@ -58,16 +120,9 @@ export const getSpendingData = () => {
   }
 };
 
-export const updateInvestmentsData = (newData: string) => {
-  const parsedData = parseCSV(newData);
-  localStorage.setItem('investmentsData', JSON.stringify(parsedData));
-};
-
 export const updateSpendingData = (newData: string) => {
   try {
-    console.log('Raw CSV data:', newData); // Debug log
     const lines = newData.trim().split('\n');
-    console.log('Lines:', lines); // Debug log
     
     // Skip any header rows that don't match our expected format
     let headerIndex = 0;
@@ -79,13 +134,11 @@ export const updateSpendingData = (newData: string) => {
     }
     
     const headers = lines[headerIndex].split(',').map(header => header.trim());
-    console.log('Headers:', headers); // Debug log
-
+    
     // Parse the CSV data starting after the headers
     const parsedData = lines.slice(headerIndex + 1)
-      .filter(line => line.trim()) // Remove empty lines
+      .filter(line => line.trim())
       .map(line => {
-        // Split by comma but handle potential commas within quotes
         const values = line.split(',').map(value => value.trim().replace(/^"|"$/g, ''));
         const row: Record<string, string> = {};
         headers.forEach((header, i) => {
@@ -94,12 +147,16 @@ export const updateSpendingData = (newData: string) => {
         return row;
       });
 
-    console.log('Parsed data:', parsedData); // Debug log
-    localStorage.setItem('spendingData', JSON.stringify(parsedData));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsedData));
   } catch (error) {
     console.error('Error parsing spending data:', error);
     throw new Error('Failed to parse spending data');
   }
+};
+
+export const updateInvestmentsData = (newData: string) => {
+  const parsedData = parseCSV(newData);
+  localStorage.setItem('investmentsData', JSON.stringify(parsedData));
 };
 
 const parseCSV = (csv: string) => {
@@ -122,23 +179,23 @@ export function exportInvestmentsData(): string {
   const headers = Object.keys(data[0]);
   const csvRows = [headers.join(',')];
   
-  data.forEach((row: Record<string, string>) => {
-    const values = headers.map(header => row[header]);
+  data.forEach((row: Investment) => {
+    const values = headers.map(header => String(row[header as keyof Investment] || ''));
     csvRows.push(values.join(','));
   });
   
   return csvRows.join('\n');
 }
 
-export function exportSpendingData(): string {
-  const data = getSpendingData();
+export async function exportSpendingData(): Promise<string> {
+  const data = await getSpendingData();
   if (!data || data.length === 0) return '';
   
   const headers = ['date', 'category', 'amount'];
   const csvRows = [headers.join(',')];
   
-  data.forEach((row: Record<string, string>) => {
-    const values = headers.map(header => row[header]);
+  data.forEach((transaction: Transaction) => {
+    const values = headers.map(header => transaction[header as keyof Transaction]);
     csvRows.push(values.join(','));
   });
   
@@ -156,4 +213,60 @@ export function downloadCSV(data: string, filename: string): void {
   a.click();
   document.body.removeChild(a);
   window.URL.revokeObjectURL(url);
-} 
+}
+
+export function parseCSVData(newData: string): Transaction[] {
+  try {
+    const lines = newData.split('\n');
+    if (lines.length < 2) return [];
+
+    const headers = lines[0].split(',').map(header => 
+      header.trim().toLowerCase()
+    );
+
+    const parsedData = lines.slice(1)
+      .filter(line => line.trim())
+      .map(line => {
+        const values = line.split(',').map(value => value.trim());
+        const item: Partial<Transaction> = {};
+        
+        headers.forEach((header, index) => {
+          const value = values[index] || '';
+          if (header === 'amount') {
+            // Remove currency symbols and convert to number
+            const numericValue = parseFloat(value.replace(/[^0-9.-]/g, ''));
+            item.amount = isNaN(numericValue) ? 0 : numericValue;
+          } else if (header === 'type') {
+            item.type = (value as 'Payment' | 'Return' | 'Purchase') || 'Purchase';
+          } else if (header === 'date' || header === 'description' || header === 'category') {
+            item[header] = value;
+          }
+        });
+
+        // Ensure all required fields are present
+        const transaction: Transaction = {
+          date: item.date || new Date().toLocaleDateString(),
+          description: item.description || 'Unknown',
+          category: item.category || 'Uncategorized',
+          amount: item.amount || 0,
+          type: item.type || 'Purchase'
+        };
+
+        // Adjust amount sign based on transaction type
+        if (transaction.type === 'Payment' || transaction.type === 'Return') {
+          transaction.amount = -Math.abs(transaction.amount);
+        } else {
+          transaction.amount = Math.abs(transaction.amount);
+        }
+
+        return transaction;
+      });
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsedData));
+    window.dispatchEvent(new Event('spendingDataUpdated'));
+    return parsedData;
+  } catch (error) {
+    console.error('Error parsing spending data:', error);
+    return [];
+  }
+}

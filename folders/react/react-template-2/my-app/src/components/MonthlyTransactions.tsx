@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -17,15 +17,10 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { getSpendingData } from '@/lib/csv-storage';
+import { formatCurrency } from '@/lib/utils';
+import { Transaction } from '@/types/transaction';
 
-interface Transaction {
-  date: string;
-  description: string;
-  category: string;
-  amount: string;
-}
-
-interface GroupedTransactions {
+export interface GroupedTransactions {
   [key: string]: Transaction[];
 }
 
@@ -33,15 +28,44 @@ const MonthlyTransactions = () => {
   const [selectedMonth, setSelectedMonth] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortConfig, setSortConfig] = useState<{ key: keyof Transaction; direction: 'ascending' | 'descending' } | null>(null);
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [total, setTotal] = useState(0);
 
-  const transactions = useMemo(() => {
-    const data = getSpendingData();
-    return data.map((t: Transaction) => ({
-      ...t,
-      amount: Math.abs(parseFloat(t.amount)).toFixed(2)
-    }));
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getSpendingData();
+        setTransactions(data);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+
+    const handleDataUpdate = () => {
+      loadData();
+    };
+
+    window.addEventListener('storage', handleDataUpdate);
+    window.addEventListener('spendingDataUpdated', handleDataUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleDataUpdate);
+      window.removeEventListener('spendingDataUpdated', handleDataUpdate);
+    };
   }, []);
+
+  useEffect(() => {
+    const monthlyTotal = transactions.reduce((sum, transaction) => {
+      return sum + transaction.amount;
+    }, 0);
+    setTotal(monthlyTotal);
+  }, [transactions]);
 
   const groupedTransactions = useMemo(() => {
     return transactions.reduce((acc: GroupedTransactions, transaction: Transaction) => {
@@ -76,7 +100,7 @@ const MonthlyTransactions = () => {
       filtered = filtered.filter((t: Transaction) => 
         t.description.toLowerCase().includes(query) ||
         t.category.toLowerCase().includes(query) ||
-        t.amount.includes(query)
+        t.amount.toString().includes(query)
       );
     }
 
@@ -110,26 +134,20 @@ const MonthlyTransactions = () => {
     });
   };
 
-  const formatCurrency = (value: string) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(parseFloat(value));
-  };
-
   const formatDate = (dateStr: string) => {
     const [month, day, year] = dateStr.split('/');
     return new Date(parseInt(year), parseInt(month) - 1, parseInt(day)).toLocaleDateString();
   };
 
-  const handleEdit = (transaction: Transaction) => {
-    setEditingTransaction(transaction);
-  };
-
-  const handleSave = () => {
-    // TODO: Implement save functionality
-    setEditingTransaction(null);
-  };
+  if (isLoading) {
+    return (
+      <Card className="p-6">
+        <CardHeader>
+          <CardTitle>Loading Transactions...</CardTitle>
+        </CardHeader>
+      </Card>
+    );
+  }
 
   return (
     <Card className="p-6">
@@ -138,26 +156,29 @@ const MonthlyTransactions = () => {
       </CardHeader>
       <CardContent>
         <div className="flex flex-col space-y-4">
-          <div className="flex items-center space-x-4">
-            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+          <div className="flex justify-between items-center">
+            <Select
+              value={selectedMonth}
+              onValueChange={setSelectedMonth}
+            >
               <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select a month" />
+                <SelectValue placeholder="Select month" />
               </SelectTrigger>
               <SelectContent>
-                {availableMonths.map(month => (
+                {availableMonths.map((month) => (
                   <SelectItem key={month.value} value={month.value}>
                     {month.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Input
-              placeholder="Search transactions..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="max-w-sm"
-            />
           </div>
+          <Input
+            placeholder="Search transactions..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="max-w-sm"
+          />
           <div className="rounded-md border">
             <Table>
               <TableHeader>
@@ -186,7 +207,6 @@ const MonthlyTransactions = () => {
                   >
                     Amount {sortConfig?.key === 'amount' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                   </TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -195,19 +215,22 @@ const MonthlyTransactions = () => {
                     <TableCell>{formatDate(transaction.date)}</TableCell>
                     <TableCell>{transaction.description}</TableCell>
                     <TableCell>{transaction.category}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(transaction.amount)}</TableCell>
-                    <TableCell className="text-right">
-                      <button
-                        onClick={() => handleEdit(transaction)}
-                        className="text-blue-600 hover:text-blue-800"
-                      >
-                        Edit
-                      </button>
+                    <TableCell className={`text-right ${transaction.amount < 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {formatCurrency(transaction.amount)}
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">Total Spending</span>
+              <span className="font-medium">{formatCurrency(total)}</span>
+            </div>
+            <div className="text-sm text-gray-500">
+              {transactions.length} transactions
+            </div>
           </div>
         </div>
       </CardContent>

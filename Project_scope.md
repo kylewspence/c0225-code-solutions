@@ -1,91 +1,101 @@
-# Financial Dashboard Project Roadmap
+# Project Scope
 
 ## Completed Features
-- Basic dashboard layout with tabbed interface
-- File upload functionality for spending and investment data
-- Spending analysis with:
-  - Monthly spending trends (line chart)
-  - Category breakdown (horizontal bar chart)
-  - Transaction listing with filtering and sorting
-- Investment portfolio view with:
-  - Basic portfolio metrics
-  - Holdings table
-  - Sample data integration
+- Basic dashboard layout with responsive design and tabbed interface
+- File upload functionality for financial data
+- Spending analysis with visualizations and insights
+- Investment portfolio view with holdings breakdown
+- Transaction management and categorization
+- Data visualization components for financial metrics
+- RentCast API integration with caching and rate limiting
+- Consolidated financial insights widget
+- Currency formatting utility
+- Property value estimation from RentCast API
+- Enhanced mobile responsiveness across all components
+- Streamlined UI with reduced redundancy
 
 ## Current Issues to Address
-1. Data Processing
-   - [ ] Fix description field not showing in transactions
-   - [ ] Handle credit card payments categorization
-   - [ ] Implement transaction editing functionality
-   - [ ] Fix investment data parsing and NaN values
+1. Data Processing and Validation
+   - [ ] Implement comprehensive input validation for file uploads
+   - [ ] Add data sanitization for API inputs
+   - [ ] Create data transformation pipeline for consistency
 
 2. UI/UX Improvements
-   - [ ] Consistent styling across all tabs
-   - [ ] Better spacing and padding in containers
-   - [ ] Improve loading states
-   - [ ] Add error handling and user feedback
+   - [x] Enhance mobile responsiveness
+   - [x] Clean up redundant information displays
+   - [ ] Add loading states for API calls
+   - [ ] Implement error message displays
+   - [ ] Add tooltips for complex financial terms
 
-3. Investment Features
-   - [ ] Integrate real-time stock data API
-   - [ ] Add detailed stock profile view
-   - [ ] Implement portfolio performance tracking
-   - [ ] Add historical price charts
+3. API Integration
+   - [x] Implement RentCast API caching
+   - [x] Add rate limiting for API calls
+   - [ ] Implement offline fallback for cached data
+   - [ ] Add retry mechanism for failed API calls
+
+4. Investment Features
+   - [ ] Add real-time stock price updates
+   - [ ] Implement portfolio rebalancing suggestions
+   - [ ] Add dividend tracking
+   - [ ] Create investment performance reports
 
 ## Future Enhancements
 1. Data Management
-   - [ ] Add data export functionality
-   - [ ] Implement data backup/restore
-   - [ ] Add data validation and cleaning tools
-   - [ ] Support multiple file formats
+   - [ ] Implement data export functionality
+   - [ ] Add custom date range filtering
+   - [ ] Create data backup system
+   - [ ] Add data import from multiple sources
 
 2. Analytics
-   - [ ] Add spending forecasts
-   - [ ] Implement budget tracking
-   - [ ] Add investment performance metrics
-   - [ ] Create custom reports
+   - [ ] Add predictive spending patterns
+   - [ ] Implement budget forecasting
+   - [ ] Create custom report generation
+   - [ ] Add goal progress tracking
 
 3. User Features
-   - [ ] Add user authentication
-   - [ ] Implement data sharing
-   - [ ] Add notification system
-   - [ ] Create user preferences
+   - [ ] Add user preferences
+   - [ ] Implement notification system
+   - [ ] Add custom categories
+   - [ ] Create sharing capabilities
 
 4. Integration
-   - [ ] Connect to banking APIs
-   - [ ] Add investment platform integration
-   - [ ] Implement tax reporting features
-   - [ ] Add financial goal tracking
+   - [ ] Add support for multiple property data providers
+   - [ ] Implement banking API integration
+   - [ ] Add support for cryptocurrency tracking
+   - [ ] Create tax document generation
 
 ## Technical Debt
-- [ ] Improve error handling
-- [ ] Add comprehensive testing
-- [ ] Optimize performance
-- [ ] Refactor component structure
-- [ ] Add proper documentation
+1. Performance Optimization
+   - [ ] Implement component lazy loading
+   - [ ] Optimize API call batching
+   - [ ] Add request debouncing
+   - [ ] Implement virtual scrolling for large lists
+
+2. Code Quality
+   - [ ] Add comprehensive unit tests
+   - [ ] Implement end-to-end testing
+   - [ ] Add automated accessibility testing
+   - [ ] Create API documentation
+
+3. Security
+   - [ ] Implement API key rotation
+   - [ ] Add rate limiting for all external APIs
+   - [ ] Implement data encryption
+   - [ ] Add security headers
 
 ## Next Steps (Priority Order)
-1. Fix current data issues:
-   - Implement transaction editing
-   - Fix description field display
-   - Correct investment data parsing
-
-2. Add real-time stock data:
-   - Research and select stock API
-   - Implement API integration
-   - Add stock detail view
-
-3. Improve UI consistency:
-   - Standardize card layouts
-   - Implement consistent spacing
-   - Add loading states
-
-4. Add data management features:
-   - Implement transaction editing
-   - Add data validation
-   - Improve error handling
+1. Complete error handling implementation
+2. Add comprehensive loading states
+3. Implement offline support
+4. Add automated testing
+5. Create API documentation
+6. Implement user preferences
+7. Add data export functionality
+8. Create custom reporting
 
 ## Notes
-- Token counter needs to be connected to actual API usage
-- Consider adding data visualization library for better charts
-- Need to implement proper state management for large datasets
-- Consider adding offline support 
+- Monitor API usage to stay within rate limits
+- Consider implementing a token counter for API calls
+- Plan for scalability with increased user base
+- Consider adding progressive web app capabilities
+- Document all API integrations thoroughly 

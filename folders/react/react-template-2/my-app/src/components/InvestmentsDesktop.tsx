@@ -1,91 +1,81 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { getInvestmentsData } from '@/lib/csv-storage';
+import { formatCurrency } from '@/lib/utils';
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { AlertCircle, Home, TrendingUp, RefreshCw } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Investment, StockInvestment, PropertyInvestment, investmentService } from '@/lib/investment-service';
 
-interface Investment {
-  date: string;
-  symbol: string;
-  shares: number;
-  price: number;
-  currentPrice?: number;
-  value?: number;
-  change?: number;
-}
+const STOCK_SECTORS: Record<string, string> = {
+  AAPL: 'Technology',
+  MSFT: 'Technology',
+  GOOGL: 'Technology',
+  AMZN: 'Consumer Cyclical',
+  NVDA: 'Technology'
+};
 
-const sampleData: Investment[] = [
-  { date: '2024-03-01', symbol: 'AAPL', shares: 10, price: 170.73 },
-  { date: '2024-03-01', symbol: 'MSFT', shares: 5, price: 415.32 },
-  { date: '2024-03-01', symbol: 'GOOGL', shares: 3, price: 142.56 },
-  { date: '2024-03-01', symbol: 'AMZN', shares: 2, price: 178.75 },
-  { date: '2024-03-01', symbol: 'META', shares: 4, price: 485.96 },
-];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 const InvestmentsDesktop = () => {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadData = async () => {
+    try {
+      setRefreshing(true);
+      const data = await investmentService.getInvestments();
+      setInvestments(data);
+    } catch (error) {
+      console.error('Error loading investment data:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const data = getInvestmentsData();
-        if (data && data.length > 0) {
-          // Convert string values to numbers and ensure proper formatting
-          const formattedData = data.map((item: Investment) => ({
-            ...item,
-            shares: parseFloat(item.shares.toString()) || 0,
-            price: parseFloat(item.price.toString()) || 0,
-          }));
-          setInvestments(formattedData);
-        } else {
-          setInvestments(sampleData);
-        }
-      } catch (error) {
-        console.error('Error loading investment data:', error);
-        setInvestments(sampleData);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadData();
-
-    const handleDataUpdate = () => {
-      loadData();
-    };
-
-    window.addEventListener('storage', handleDataUpdate);
-    window.addEventListener('investmentsDataUpdated', handleDataUpdate);
-    
-    return () => {
-      window.removeEventListener('storage', handleDataUpdate);
-      window.removeEventListener('investmentsDataUpdated', handleDataUpdate);
-    };
   }, []);
 
-  const calculateTotalValue = (investments: Investment[]) => {
-    return investments.reduce((total, investment) => {
-      const value = investment.shares * investment.price;
-      return total + (isNaN(value) ? 0 : value);
-    }, 0);
+  const calculateTotalValue = () => {
+    return investments.reduce((total, investment) => total + investment.value, 0);
   };
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
+  const calculateNetRealEstateValue = () => {
+    return investments
+      .filter((inv): inv is PropertyInvestment => inv.type === 'property')
+      .reduce((total, property) => {
+        const equity = property.currentValue - property.mortgage;
+        return total + equity;
+      }, 0);
   };
 
-  const formatPercentage = (value: number) => {
-    return `${value.toFixed(2)}%`;
+  const calculateMonthlyRealEstateIncome = () => {
+    return investments
+      .filter((inv): inv is PropertyInvestment => inv.type === 'property')
+      .reduce((total, property) => {
+        const monthlyIncome = property.monthlyRent - property.expenses;
+        const monthlyMortgage = property.mortgage * (property.rate / 1200); // Convert annual rate to monthly
+        return total + monthlyIncome - monthlyMortgage;
+      }, 0);
   };
 
-  const handleSymbolClick = async (symbol: string) => {
-    // TODO: Implement API call to get detailed stock information
-    console.log('Fetching details for:', symbol);
+  const calculateAssetAllocation = () => {
+    const stockValue = investments
+      .filter(inv => inv.type === 'stock')
+      .reduce((total, stock) => total + stock.value, 0);
+    
+    const realEstateValue = investments
+      .filter(inv => inv.type === 'property')
+      .reduce((total, property) => total + property.value, 0);
+
+    return [
+      { name: 'Stocks', value: stockValue },
+      { name: 'Real Estate', value: realEstateValue }
+    ];
   };
 
   if (loading) {
@@ -98,79 +88,188 @@ const InvestmentsDesktop = () => {
     );
   }
 
+  const totalValue = calculateTotalValue();
+  const netRealEstateValue = calculateNetRealEstateValue();
+  const monthlyRealEstateIncome = calculateMonthlyRealEstateIncome();
+  const assetAllocation = calculateAssetAllocation();
+
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3">
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={loadData}
+          disabled={refreshing}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+          Refresh Values
+        </Button>
+      </div>
+
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
         <Card>
-          <CardHeader className="py-4">
-            <CardTitle className="text-sm font-medium">Total Portfolio Value</CardTitle>
+          <CardHeader>
+            <CardTitle>Total Portfolio Value</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatCurrency(calculateTotalValue(investments))}
+              {formatCurrency(totalValue)}
             </div>
           </CardContent>
         </Card>
+
         <Card>
-          <CardHeader className="py-4">
-            <CardTitle className="text-sm font-medium">Risk Level</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">Moderate</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="py-4">
-            <CardTitle className="text-sm font-medium">Last Updated</CardTitle>
+          <CardHeader>
+            <CardTitle>Net Real Estate Equity</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {new Date().toLocaleDateString()}
+              {formatCurrency(netRealEstateValue)}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Monthly Real Estate Income</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {formatCurrency(monthlyRealEstateIncome)}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="p-6">
+      <Card>
         <CardHeader>
-          <CardTitle>Investment Holdings</CardTitle>
+          <CardTitle>Asset Allocation</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Symbol</TableHead>
-                  <TableHead>Shares</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Value</TableHead>
-                  <TableHead>Change</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {investments.map((investment, index) => {
-                  const value = investment.shares * investment.price;
-                  return (
-                    <TableRow 
-                      key={index}
-                      className="cursor-pointer hover:bg-gray-50"
-                      onClick={() => handleSymbolClick(investment.symbol)}
-                    >
-                      <TableCell className="font-medium">{investment.symbol}</TableCell>
-                      <TableCell>{investment.shares}</TableCell>
-                      <TableCell>{formatCurrency(investment.price)}</TableCell>
-                      <TableCell>{formatCurrency(value)}</TableCell>
-                      <TableCell className={investment.change && investment.change > 0 ? 'text-green-500' : 'text-red-500'}>
-                        {investment.change ? formatPercentage(investment.change) : 'N/A'}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={assetAllocation}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                >
+                  {assetAllocation.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         </CardContent>
       </Card>
+
+      <Tabs defaultValue="stocks" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="stocks">
+            <TrendingUp className="h-4 w-4 mr-2" />
+            Stocks
+          </TabsTrigger>
+          <TabsTrigger value="properties">
+            <Home className="h-4 w-4 mr-2" />
+            Properties
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="stocks">
+          <Card>
+            <CardHeader>
+              <CardTitle>Stock Holdings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Symbol</TableHead>
+                      <TableHead>Sector</TableHead>
+                      <TableHead>Shares</TableHead>
+                      <TableHead>Price</TableHead>
+                      <TableHead>Value</TableHead>
+                      <TableHead>Change</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {investments
+                      .filter((inv): inv is StockInvestment => inv.type === 'stock')
+                      .map((stock) => (
+                        <TableRow key={stock.id} className="hover:bg-gray-50">
+                          <TableCell className="font-medium">{stock.symbol}</TableCell>
+                          <TableCell>{STOCK_SECTORS[stock.symbol] || 'Other'}</TableCell>
+                          <TableCell>{stock.shares}</TableCell>
+                          <TableCell>{formatCurrency(stock.currentPrice)}</TableCell>
+                          <TableCell>{formatCurrency(stock.value)}</TableCell>
+                          <TableCell className={stock.change > 0 ? 'text-green-500' : 'text-red-500'}>
+                            {stock.change.toFixed(2)}%
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="properties">
+          <Card>
+            <CardHeader>
+              <CardTitle>Property Holdings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Address</TableHead>
+                      <TableHead>Current Value</TableHead>
+                      <TableHead>Mortgage</TableHead>
+                      <TableHead>Equity</TableHead>
+                      <TableHead>Monthly Income</TableHead>
+                      <TableHead>ROI</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {investments
+                      .filter((inv): inv is PropertyInvestment => inv.type === 'property')
+                      .map((property) => {
+                        const equity = property.currentValue - property.mortgage;
+                        const monthlyIncome = property.monthlyRent - property.expenses;
+                        const monthlyMortgage = property.mortgage * (property.rate / 1200);
+                        const netMonthlyIncome = monthlyIncome - monthlyMortgage;
+                        const annualROI = (netMonthlyIncome * 12) / equity * 100;
+
+                        return (
+                          <TableRow key={property.id} className="hover:bg-gray-50">
+                            <TableCell className="font-medium">{property.propertyAddress}</TableCell>
+                            <TableCell>{formatCurrency(property.currentValue)}</TableCell>
+                            <TableCell>{formatCurrency(property.mortgage)}</TableCell>
+                            <TableCell>{formatCurrency(equity)}</TableCell>
+                            <TableCell>{formatCurrency(netMonthlyIncome)}</TableCell>
+                            <TableCell className={annualROI > 0 ? 'text-green-500' : 'text-red-500'}>
+                              {annualROI.toFixed(1)}%
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

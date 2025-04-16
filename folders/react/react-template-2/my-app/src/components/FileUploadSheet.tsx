@@ -8,64 +8,31 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import { updateInvestmentsData, updateSpendingData } from '@/lib/csv-storage';
+import { parseCSVData } from '@/lib/csv-storage';
 
 const FileUploadSheet = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadType, setUploadType] = useState<'investments' | 'spending'>('spending');
   const { toast } = useToast();
+  const [isOpen, setIsOpen] = useState(false);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type === 'text/csv') {
-      setSelectedFile(file);
-    } else {
-      toast({
-        title: 'Invalid File Type',
-        description: 'Please select a CSV file.',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleUpload = async () => {
-    if (!selectedFile) return;
+    if (!file) return;
 
     try {
-      const text = await selectedFile.text();
-      console.log('File content:', text); // Debug log
-
-      if (uploadType === 'investments') {
-        updateInvestmentsData(text);
-      } else {
-        updateSpendingData(text);
-      }
-
+      const text = await file.text();
+      parseCSVData(text);
+      
       toast({
-        title: 'Upload Successful',
-        description: `Your ${uploadType} data has been updated.`,
+        title: 'Success',
+        description: 'File uploaded and processed successfully.',
       });
-
-      // Dispatch a custom event to notify components of the update
-      const event = new CustomEvent(`${uploadType}DataUpdated`);
-      window.dispatchEvent(event);
-
-      // Add a small delay before dispatching a second event
-      setTimeout(() => {
-        const secondEvent = new CustomEvent(`${uploadType}DataUpdated`);
-        window.dispatchEvent(secondEvent);
-      }, 100);
-
-      setSelectedFile(null);
       setIsOpen(false);
     } catch (error) {
       console.error('Upload error:', error);
       toast({
-        title: 'Upload Failed',
-        description: 'There was an error processing your file.',
+        title: 'Error',
+        description: 'Failed to process the file. Please check the format and try again.',
         variant: 'destructive',
       });
     }
@@ -78,40 +45,22 @@ const FileUploadSheet = () => {
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Upload Financial Data</SheetTitle>
+          <SheetTitle>Upload Data</SheetTitle>
           <SheetDescription>
-            Upload your Chase credit card transactions in CSV format.
-            Make sure the CSV file includes the transaction date, category, and amount.
+            Upload your financial data in CSV format.
+            <br />
+            The file should include columns for date, description, category, and amount.
           </SheetDescription>
         </SheetHeader>
         <div className="grid gap-4 py-4">
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <Button
-                variant={uploadType === 'spending' ? 'default' : 'outline'}
-                onClick={() => setUploadType('spending')}
-                className="flex-1"
-              >
-                Spending
-              </Button>
-              <Button
-                variant={uploadType === 'investments' ? 'default' : 'outline'}
-                onClick={() => setUploadType('investments')}
-                className="flex-1"
-              >
-                Investments
-              </Button>
-            </div>
+          <div className="flex flex-col space-y-2">
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleFileUpload}
+              className="cursor-pointer"
+            />
           </div>
-          <Input
-            id="file"
-            type="file"
-            accept=".csv"
-            onChange={handleFileChange}
-          />
-          <Button onClick={handleUpload} disabled={!selectedFile}>
-            Upload
-          </Button>
         </div>
       </SheetContent>
     </Sheet>
