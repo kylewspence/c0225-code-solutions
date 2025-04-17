@@ -49,9 +49,7 @@ export function Todos() {
       setTodos([...todos, data]);
     } catch (err) {
       console.error(err);
-      setError(err);
-    } finally {
-      setIsLoading(false);
+      alert('Error');
     }
   }
 
