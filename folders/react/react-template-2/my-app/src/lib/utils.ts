@@ -97,8 +97,14 @@ export function useDataLoader<T>(
           setData(cached);
           setLoading(false);
           // Refresh in background if TTL is close to expiring
-          if (cacheOptions?.ttl && Date.now() - JSON.parse(localStorage.getItem(cacheOptions.key)!).timestamp > cacheOptions.ttl * 0.8) {
-            refresh();
+          if (cacheOptions?.ttl && cacheOptions.key) {
+            const cached = localStorage.getItem(cacheOptions.key);
+            if (cached) {
+              const { timestamp } = JSON.parse(cached);
+              if (Date.now() - timestamp > cacheOptions.ttl * 0.8) {
+                refresh();
+              }
+            }
           }
           return;
         }

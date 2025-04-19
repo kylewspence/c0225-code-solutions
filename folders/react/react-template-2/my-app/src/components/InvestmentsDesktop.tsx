@@ -29,7 +29,11 @@ const InvestmentsDesktop = () => {
   const { data: investments, loading, refresh, refreshing } = useDataLoader(
     investmentService.getInvestments,
     [],
-    ['investmentsDataUpdated']
+    ['investmentsDataUpdated'],
+    {
+      key: 'investments-cache',
+      ttl: 5 * 60 * 1000 // 5 minutes cache
+    }
   );
 
   const calculations = useMemo(() => {

@@ -3,5 +3,5 @@ export interface Transaction {
   description: string;
   category: string;
   amount: number;
-  type: 'Payment' | 'Return' | 'Purchase';
+  type: 'Sale' | 'Payment' | 'Return';
 } 
