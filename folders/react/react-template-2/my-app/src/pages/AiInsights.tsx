@@ -1,74 +1,74 @@
 import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { AIRequester } from '../components/AIRequester';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import FinancialGoals from '@/components/FinancialGoals';
+import FinancialInsights from '@/components/FinancialInsights';
+import { BarChart2, Target, Brain, TrendingUp } from 'lucide-react';
 
-const AiInsights = () => {
-  const [question, setQuestion] = useState('');
-  const [response, setResponse] = useState<string | null>(null);
+const AIInsights = () => {
+  const [activeTab, setActiveTab] = useState('overview');
 
   return (
-    <div className="pt-24 px-8 space-y-8">
-      <h1 className="text-3xl font-bold text-gray-800">AI Insights</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="bg-white border-blue-100">
-          <CardContent className="p-4 space-y-2">
-            <p className="text-sm text-gray-500">Spending Flag</p>
-            <p className="text-base italic text-gray-700">
-              "You've exceeded your average entertainment budget by 35% this
-              month."
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white border-blue-100">
-          <CardContent className="p-4 space-y-2">
-            <p className="text-sm text-gray-500">
-              Tax Optimization Tip
-            </p>
-            <p className="text-base italic text-gray-700">
-              "Consider contributing to your HSA before the end of the fiscal
-              year to reduce taxable income."
-            </p>
-          </CardContent>
-        </Card>
+    <div className="flex-1 space-y-6 p-6 md:p-8 pt-6">
+      <div className="flex items-center justify-between space-y-2">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight flex items-center">
+            <Brain className="mr-2 h-8 w-8" />
+            AI Financial Insights
+          </h2>
+          <p className="text-muted-foreground">
+            AI-powered analysis and recommendations for your financial journey
+          </p>
+        </div>
       </div>
 
-      <Card className="bg-white border-blue-100">
-        <CardContent className="p-4 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-800">Ask the AI</h2>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="overview" className="flex items-center">
+            <BarChart2 className="mr-2 h-4 w-4" />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="goals" className="flex items-center">
+            <Target className="mr-2 h-4 w-4" />
+            Goals
+          </TabsTrigger>
+          <TabsTrigger value="recommendations" className="flex items-center">
+            <TrendingUp className="mr-2 h-4 w-4" />
+            Recommendations
+          </TabsTrigger>
+        </TabsList>
 
-          <div className="flex gap-2">
-            <Input
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder="Ask anything about your finances..."
-              className="bg-blue-50 border-blue-200 text-gray-800 placeholder:text-gray-500 focus:border-blue-300"
-            />
-            <AIRequester
-              userInput={question}
-              onResult={(res) => setResponse(res)}
-              buttonText={
-                <Button
-                  type="button"
-                  className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-semibold px-6 py-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200">
-                  Ask
-                </Button>
-              }
-            />
-          </div>
+        <TabsContent value="overview" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Financial Health Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FinancialInsights />
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-          {response && (
-            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded text-sm text-gray-700">
-              <strong className="block mb-1 text-gray-800">AI Response:</strong>
-              <p>{response}</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        <TabsContent value="goals" className="space-y-6">
+          <FinancialGoals />
+        </TabsContent>
+
+        <TabsContent value="recommendations" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>AI Recommendations</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-muted-foreground">
+                Based on your financial data, here are personalized recommendations:
+              </div>
+              {/* We'll add AI recommendations component here */}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
 
-export default AiInsights;
+export default AIInsights;

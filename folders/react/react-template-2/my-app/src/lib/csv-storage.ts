@@ -1,218 +1,448 @@
-// Sample CSV data for investments
-const SAMPLE_INVESTMENTS_CSV = `date,value,return
-2024-01-01,100000,0
-2024-01-15,101200,1.2
-2024-02-01,102500,2.5
-2024-02-15,103800,3.8
-2024-03-01,105000,5.0
-2024-03-15,106200,6.2
-2024-04-01,107500,7.5`;
+import { Transaction } from '@/types/transaction';
 
-// Sample CSV data for spending
-const SAMPLE_SPENDING_CSV = `date,category,amount
-2024-01-01,Dining,120
-2024-01-05,Groceries,85
-2024-01-10,Entertainment,45
-2024-01-15,Transportation,60
-2024-01-20,Utilities,150
-2024-01-25,Shopping,200`;
+export interface Investment {
+  type: 'stock' | 'property';
+  date: string;
+  // Stock specific fields
+  symbol?: string;
+  shares?: number;
+  price?: number;
+  currentPrice?: number;
+  // Property specific fields
+  propertyAddress?: string;
+  purchasePrice?: number;
+  currentValue?: number;
+  mortgage?: number;
+  rate?: number;
+  monthlyRent?: number;
+  expenses?: number;
+  // Common fields
+  value?: number;
+  change?: number;
+}
+
+// Sample CSV data for investments
+const SAMPLE_INVESTMENTS_CSV = `type,date,symbol,shares,price,currentPrice,propertyAddress,purchasePrice,currentValue,mortgage,rate,monthlyRent,expenses
+stock,2024-01-01,AAPL,100,190.50,195.20,,,,,,,,
+stock,2024-01-01,MSFT,50,375.80,380.20,,,,,,,,
+stock,2024-01-01,GOOGL,30,140.20,142.50,,,,,,,,
+stock,2024-01-01,AMZN,40,155.30,158.40,,,,,,,,
+stock,2024-01-01,NVDA,25,480.50,490.20,,,,,,,,
+property,2024-01-01,,,,,123 Main St,450000,475000,350000,4.25,2800,800
+property,2024-01-01,,,,,456 Oak Ave,380000,395000,290000,3.75,2400,650`;
+
+// Add sample spending data
+const SAMPLE_SPENDING_CSV = `date,description,amount,type,category
+2024/03/15,Grocery Store,-125.50,Sale,Groceries
+2024/03/14,Restaurant,-45.75,Sale,Dining
+2024/03/13,Gas Station,-35.20,Sale,Transportation
+2024/03/12,Monthly Salary,3500.00,Payment,Income
+2024/03/10,Internet Bill,-89.99,Sale,Utilities
+2024/03/08,Coffee Shop,-4.75,Sale,Dining
+2024/03/05,Amazon Purchase,-65.99,Sale,Shopping
+2024/03/03,Uber Ride,-22.50,Sale,Transportation
+2024/03/01,Rent Payment,-1500.00,Sale,Housing
+2024/02/28,Pharmacy,-32.50,Sale,Healthcare
+2024/02/25,Movie Tickets,-30.00,Sale,Entertainment
+2024/02/20,Bonus Payment,1000.00,Payment,Income
+2024/02/15,Electric Bill,-75.50,Sale,Utilities`;
+
+const STORAGE_KEY = 'spendingData';
 
 export const initializeSampleData = () => {
-  // Check if data already exists
-  if (localStorage.getItem('spendingData') && localStorage.getItem('investmentsData')) {
-    return;
-  }
-
-  // Sample spending data
-  const spendingData = [
-    // January 2024
-    { id: '1', date: '2024-01-01', category: 'Groceries', amount: '1205.50' },
-    { id: '2', date: '2024-01-02', category: 'Transportation', amount: '450.00' },
-    { id: '3', date: '2024-01-03', category: 'Entertainment', amount: '752.50' },
-    { id: '4', date: '2024-01-04', category: 'Utilities', amount: '1500.00' },
-    { id: '5', date: '2024-01-05', category: 'Dining', amount: '657.50' },
-    { id: '6', date: '2024-01-06', category: 'Shopping', amount: '2000.00' },
-    { id: '7', date: '2024-01-07', category: 'Healthcare', amount: '855.00' },
-    { id: '8', date: '2024-01-08', category: 'Education', amount: '3000.00' },
-    { id: '9', date: '2024-01-09', category: 'Travel', amount: '5000.00' },
-    { id: '10', date: '2024-01-10', category: 'Groceries', amount: '952.50' },
-    // December 2023
-    { id: '11', date: '2023-12-01', category: 'Groceries', amount: '1350.75' },
-    { id: '12', date: '2023-12-05', category: 'Shopping', amount: '2500.00' }, // Holiday shopping
-    { id: '13', date: '2023-12-10', category: 'Entertainment', amount: '850.00' },
-    { id: '14', date: '2023-12-15', category: 'Travel', amount: '3500.00' }, // Holiday travel
-    { id: '15', date: '2023-12-20', category: 'Dining', amount: '1200.00' },
-    { id: '16', date: '2023-12-25', category: 'Gifts', amount: '2000.00' },
-    // November 2023
-    { id: '17', date: '2023-11-01', category: 'Utilities', amount: '1450.00' },
-    { id: '18', date: '2023-11-10', category: 'Healthcare', amount: '950.00' },
-    { id: '19', date: '2023-11-15', category: 'Education', amount: '2800.00' },
-    { id: '20', date: '2023-11-20', category: 'Transportation', amount: '550.00' },
-    { id: '21', date: '2023-11-25', category: 'Shopping', amount: '1800.00' }, // Black Friday
-    // October 2023
-    { id: '22', date: '2023-10-01', category: 'Rent', amount: '2500.00' },
-    { id: '23', date: '2023-10-05', category: 'Groceries', amount: '1150.25' },
-    { id: '24', date: '2023-10-10', category: 'Entertainment', amount: '650.00' },
-    { id: '25', date: '2023-10-15', category: 'Healthcare', amount: '750.00' },
-    { id: '26', date: '2023-10-31', category: 'Entertainment', amount: '450.00' }, // Halloween
-    // September 2023
-    { id: '27', date: '2023-09-01', category: 'Education', amount: '3200.00' }, // Back to school
-    { id: '28', date: '2023-09-05', category: 'Shopping', amount: '1500.00' },
-    { id: '29', date: '2023-09-10', category: 'Travel', amount: '2800.00' },
-    { id: '30', date: '2023-09-15', category: 'Dining', amount: '750.00' },
-    // August 2023
-    { id: '31', date: '2023-08-01', category: 'Utilities', amount: '1650.00' }, // Summer AC
-    { id: '32', date: '2023-08-10', category: 'Entertainment', amount: '950.00' },
-    { id: '33', date: '2023-08-15', category: 'Travel', amount: '4500.00' }, // Summer vacation
-    { id: '34', date: '2023-08-20', category: 'Shopping', amount: '1200.00' },
-    // July 2023
-    { id: '35', date: '2023-07-01', category: 'Rent', amount: '2500.00' },
-    { id: '36', date: '2023-07-04', category: 'Entertainment', amount: '850.00' }, // July 4th
-    { id: '37', date: '2023-07-10', category: 'Groceries', amount: '1250.75' },
-    { id: '38', date: '2023-07-15', category: 'Healthcare', amount: '650.00' },
-    // June 2023
-    { id: '39', date: '2023-06-01', category: 'Utilities', amount: '1400.00' },
-    { id: '40', date: '2023-06-10', category: 'Entertainment', amount: '750.00' },
-    { id: '41', date: '2023-06-15', category: 'Travel', amount: '3200.00' },
-    { id: '42', date: '2023-06-20', category: 'Shopping', amount: '1100.00' },
-    // May 2023
-    { id: '43', date: '2023-05-01', category: 'Rent', amount: '2500.00' },
-    { id: '44', date: '2023-05-05', category: 'Groceries', amount: '1150.25' },
-    { id: '45', date: '2023-05-10', category: 'Healthcare', amount: '800.00' },
-    { id: '46', date: '2023-05-15', category: 'Entertainment', amount: '550.00' },
-    // April 2023
-    { id: '47', date: '2023-04-01', category: 'Utilities', amount: '1300.00' },
-    { id: '48', date: '2023-04-10', category: 'Education', amount: '2900.00' },
-    { id: '49', date: '2023-04-15', category: 'Shopping', amount: '950.00' },
-    { id: '50', date: '2023-04-20', category: 'Travel', amount: '2800.00' },
-    // March 2023
-    { id: '51', date: '2023-03-01', category: 'Rent', amount: '2500.00' },
-    { id: '52', date: '2023-03-05', category: 'Groceries', amount: '1100.50' },
-    { id: '53', date: '2023-03-15', category: 'Entertainment', amount: '600.00' },
-    { id: '54', date: '2023-03-17', category: 'Dining', amount: '850.00' }, // St. Patrick's
-    // February 2023
-    { id: '55', date: '2023-02-01', category: 'Utilities', amount: '1450.00' },
-    { id: '56', date: '2023-02-10', category: 'Healthcare', amount: '700.00' },
-    { id: '57', date: '2023-02-14', category: 'Dining', amount: '950.00' }, // Valentine's
-    { id: '58', date: '2023-02-20', category: 'Shopping', amount: '1300.00' },
-    // January 2023
-    { id: '59', date: '2023-01-01', category: 'Rent', amount: '2500.00' },
-    { id: '60', date: '2023-01-05', category: 'Groceries', amount: '1050.25' },
-    { id: '61', date: '2023-01-10', category: 'Entertainment', amount: '500.00' },
-    { id: '62', date: '2023-01-15', category: 'Healthcare', amount: '600.00' }
-  ];
-
-  // Enhanced sample investments data with multiple assets and sectors
-  const investmentsData = [
-    {
-      id: '1',
-      date: '2024-01-01',
-      value: '100000',
-      return: '0',
-      assets: [
-        { name: 'AAPL', sector: 'Technology', shares: '50', price: '150.00', value: '7500' },
-        { name: 'MSFT', sector: 'Technology', shares: '30', price: '250.00', value: '7500' },
-        { name: 'JNJ', sector: 'Healthcare', shares: '40', price: '150.00', value: '6000' },
-        { name: 'JPM', sector: 'Finance', shares: '25', price: '120.00', value: '3000' },
-        { name: 'VTI', sector: 'ETF', shares: '100', price: '200.00', value: '20000' },
-        { name: 'BND', sector: 'Bonds', shares: '200', price: '75.00', value: '15000' },
-        { name: 'GLD', sector: 'Commodities', shares: '50', price: '180.00', value: '9000' },
-        { name: 'REIT', sector: 'Real Estate', shares: '100', price: '25.00', value: '2500' },
-      ]
-    },
-    {
-      id: '2',
-      date: '2024-01-02',
-      value: '101500',
-      return: '1.5',
-      assets: [
-        { name: 'AAPL', sector: 'Technology', shares: '50', price: '152.00', value: '7600' },
-        { name: 'MSFT', sector: 'Technology', shares: '30', price: '252.00', value: '7560' },
-        { name: 'JNJ', sector: 'Healthcare', shares: '40', price: '151.00', value: '6040' },
-        { name: 'JPM', sector: 'Finance', shares: '25', price: '121.00', value: '3025' },
-        { name: 'VTI', sector: 'ETF', shares: '100', price: '202.00', value: '20200' },
-        { name: 'BND', sector: 'Bonds', shares: '200', price: '75.50', value: '15100' },
-        { name: 'GLD', sector: 'Commodities', shares: '50', price: '181.00', value: '9050' },
-        { name: 'REIT', sector: 'Real Estate', shares: '100', price: '25.50', value: '2550' },
-      ]
-    },
-    {
-      id: '3',
-      date: '2024-01-03',
-      value: '102000',
-      return: '2.0',
-      assets: [
-        { name: 'AAPL', sector: 'Technology', shares: '50', price: '153.00', value: '7650' },
-        { name: 'MSFT', sector: 'Technology', shares: '30', price: '253.00', value: '7590' },
-        { name: 'JNJ', sector: 'Healthcare', shares: '40', price: '152.00', value: '6080' },
-        { name: 'JPM', sector: 'Finance', shares: '25', price: '122.00', value: '3050' },
-        { name: 'VTI', sector: 'ETF', shares: '100', price: '203.00', value: '20300' },
-        { name: 'BND', sector: 'Bonds', shares: '200', price: '76.00', value: '15200' },
-        { name: 'GLD', sector: 'Commodities', shares: '50', price: '182.00', value: '9100' },
-        { name: 'REIT', sector: 'Real Estate', shares: '100', price: '26.00', value: '2600' },
-      ]
-    },
-    {
-      id: '4',
-      date: '2024-01-04',
-      value: '101000',
-      return: '1.0',
-      assets: [
-        { name: 'AAPL', sector: 'Technology', shares: '50', price: '151.00', value: '7550' },
-        { name: 'MSFT', sector: 'Technology', shares: '30', price: '251.00', value: '7530' },
-        { name: 'JNJ', sector: 'Healthcare', shares: '40', price: '150.50', value: '6020' },
-        { name: 'JPM', sector: 'Finance', shares: '25', price: '120.50', value: '3012.5' },
-        { name: 'VTI', sector: 'ETF', shares: '100', price: '201.00', value: '20100' },
-        { name: 'BND', sector: 'Bonds', shares: '200', price: '75.25', value: '15050' },
-        { name: 'GLD', sector: 'Commodities', shares: '50', price: '180.50', value: '9025' },
-        { name: 'REIT', sector: 'Real Estate', shares: '100', price: '25.25', value: '2525' },
-      ]
-    },
-    {
-      id: '5',
-      date: '2024-01-05',
-      value: '102500',
-      return: '2.5',
-      assets: [
-        { name: 'AAPL', sector: 'Technology', shares: '50', price: '154.00', value: '7700' },
-        { name: 'MSFT', sector: 'Technology', shares: '30', price: '254.00', value: '7620' },
-        { name: 'JNJ', sector: 'Healthcare', shares: '40', price: '153.00', value: '6120' },
-        { name: 'JPM', sector: 'Finance', shares: '25', price: '123.00', value: '3075' },
-        { name: 'VTI', sector: 'ETF', shares: '100', price: '204.00', value: '20400' },
-        { name: 'BND', sector: 'Bonds', shares: '200', price: '76.50', value: '15300' },
-        { name: 'GLD', sector: 'Commodities', shares: '50', price: '183.00', value: '9150' },
-        { name: 'REIT', sector: 'Real Estate', shares: '100', price: '26.50', value: '2650' },
-      ]
+  try {
+    // Check and initialize spending data
+    if (!localStorage.getItem(STORAGE_KEY)) {
+      console.log('Initializing sample spending data...');
+      const parsedSpending = parseCSVData(SAMPLE_SPENDING_CSV);
+      if (parsedSpending.length > 0) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsedSpending));
+        window.dispatchEvent(new Event('spendingDataUpdated'));
+        console.log('Sample spending data initialized successfully');
+      } else {
+        console.warn('Failed to parse sample spending data');
+      }
     }
-  ];
-
-  // Store the data
-  localStorage.setItem('spendingData', JSON.stringify(spendingData));
-  localStorage.setItem('investmentsData', JSON.stringify(investmentsData));
+  } catch (error) {
+    console.error('Error initializing sample data:', error);
+  }
 };
 
-export const getInvestmentsData = () => {
+export const getInvestmentsData = (): Investment[] => {
   const data = localStorage.getItem('investmentsData');
   if (!data) {
     initializeSampleData();
     return JSON.parse(localStorage.getItem('investmentsData') || '[]');
   }
-  return JSON.parse(data);
+
+  const parsedData = JSON.parse(data);
+  return parsedData.map((item: any): Investment => {
+    if (item.type === 'stock') {
+      const price = parseFloat(item.price) || 0;
+      const shares = parseFloat(item.shares) || 0;
+      const currentPrice = parseFloat(item.currentPrice) || price;
+      return {
+        type: 'stock',
+        date: item.date || '',
+        symbol: item.symbol || '',
+        shares,
+        price,
+        currentPrice,
+        value: shares * currentPrice,
+        change: price ? ((currentPrice - price) / price) * 100 : 0
+      };
+    } else {
+      const purchasePrice = parseFloat(item.purchasePrice) || 0;
+      const currentValue = parseFloat(item.currentValue) || purchasePrice;
+      return {
+        type: 'property',
+        date: item.date || '',
+        propertyAddress: item.propertyAddress || '',
+        purchasePrice,
+        currentValue,
+        mortgage: parseFloat(item.mortgage) || 0,
+        rate: parseFloat(item.rate) || 0,
+        monthlyRent: parseFloat(item.monthlyRent) || 0,
+        expenses: parseFloat(item.expenses) || 0,
+        value: currentValue,
+        change: purchasePrice ? ((currentValue - purchasePrice) / purchasePrice) * 100 : 0
+      };
+    }
+  });
 };
 
-export const getSpendingData = () => {
-  const data = localStorage.getItem('spendingData');
-  if (!data) {
-    initializeSampleData();
-    return JSON.parse(localStorage.getItem('spendingData') || '[]');
+// Generic CSV parser
+const parseCSV = (csv: string, headerValidation?: (headers: string[]) => number) => {
+  const lines = csv.trim().split('\n');
+  if (lines.length < 2) return [];
+  
+  let headerIndex = 0;
+  if (headerValidation) {
+    headerIndex = headerValidation(lines);
   }
-  return JSON.parse(data);
+  
+  // Log headers for debugging
+  console.log('CSV Headers:', lines[headerIndex]);
+  
+  const headers = lines[headerIndex].split(',').map(header => header.trim());
+  return lines.slice(headerIndex + 1)
+    .filter(line => line.trim())
+    .map(line => {
+      const values = line.split(',').map(value => value.trim().replace(/^"|"$/g, ''));
+      const obj: Record<string, string> = {};
+      
+      headers.forEach((header, i) => {
+        // Preserve the exact header names from the CSV
+        obj[header] = values[i] || '';
+      });
+      
+      return obj;
+    });
 };
 
-export const updateInvestmentsData = (newData: string) => {
-  localStorage.setItem('investments', newData);
+// Validate spending data headers
+const validateSpendingHeaders = (lines: string[]): number => {
+  for (let i = 0; i < lines.length; i++) {
+    // Log each line for debugging
+    console.log('Checking line:', lines[i]);
+    
+    // Check for both possible date column names
+    if (lines[i].includes('Transaction Date') || lines[i].includes('Post Date')) {
+      console.log('Found header row at index:', i);
+      return i;
+    }
+  }
+  console.warn('No valid header row found, using first row');
+  return 0;
 };
 
 export const updateSpendingData = (newData: string) => {
-  localStorage.setItem('spending', newData);
-}; 
+  try {
+    // Split into lines and find the header row
+    const lines = newData.trim().split('\n');
+    const headerRow = lines.findIndex(line => line.includes('Transaction Date'));
+    if (headerRow === -1) {
+      throw new Error('Could not find Transaction Date column');
+    }
+
+    // Get headers and data rows
+    const headers = lines[headerRow].split(',').map(h => h.trim());
+    const dataRows = lines.slice(headerRow + 1)
+      .filter(line => line.trim())
+      .map(line => {
+        const values = line.split(',').map(v => v.trim());
+        const row: Record<string, string> = {};
+        headers.forEach((header, i) => {
+          row[header] = values[i] || '';
+        });
+        return row;
+      });
+
+    // Store the raw parsed data
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(dataRows));
+    window.dispatchEvent(new Event('spendingDataUpdated'));
+  } catch (error) {
+    console.error('Error parsing spending data:', error);
+    throw new Error('Failed to parse spending data');
+  }
+};
+
+export const updateInvestmentsData = (newData: string) => {
+  const parsedData = parseCSV(newData);
+  localStorage.setItem('investmentsData', JSON.stringify(parsedData));
+  window.dispatchEvent(new Event('investmentsDataUpdated'));
+};
+
+// Data validation interfaces
+interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+interface DataValidators {
+  [key: string]: (value: any) => boolean;
+}
+
+// Validation functions
+const validators: DataValidators = {
+  isValidDate: (value: string) => {
+    if (!value) return false;
+    const date = new Date(value);
+    return !isNaN(date.getTime());
+  },
+  isValidAmount: (value: any) => {
+    if (value === null || value === undefined) return false;
+    const cleaned = String(value).replace(/[^0-9.\-()]/g, '');
+    return !isNaN(parseFloat(cleaned));
+  }
+};
+
+// Safe data access helper
+const safeGet = (obj: any, key: string | undefined, defaultValue: any = ''): any => {
+  if (!key || !obj) return defaultValue;
+  return obj[key] ?? defaultValue;
+};
+
+// Normalize amount value
+const normalizeAmount = (value: any): number => {
+  if (!value) return 0;
+  
+  try {
+    const strValue = String(value);
+    // Remove currency symbols and extra spaces
+    let cleaned = strValue.replace(/[^0-9.\-()]/g, '');
+    
+    // Handle parentheses notation
+    if (cleaned.includes('(') && cleaned.includes(')')) {
+      cleaned = '-' + cleaned.replace(/[()]/g, '');
+    }
+    
+    const amount = parseFloat(cleaned);
+    return isNaN(amount) ? 0 : amount;
+  } catch (error) {
+    console.warn('Error normalizing amount:', value, error);
+    return 0;
+  }
+};
+
+// Find matching key helper
+const findMatchingKey = (obj: Record<string, any>, patterns: string[]): string | undefined => {
+  if (!obj || typeof obj !== 'object') return undefined;
+  
+  return Object.keys(obj).find(key => 
+    patterns.some(pattern => 
+      key.toLowerCase().includes(pattern.toLowerCase())
+    )
+  );
+};
+
+export const getSpendingData = async (): Promise<Transaction[]> => {
+  try {
+    const rawData = localStorage.getItem(STORAGE_KEY);
+    if (!rawData) {
+      console.log('No spending data found, initializing sample data...');
+      initializeSampleData();
+      const sampleData = localStorage.getItem(STORAGE_KEY);
+      if (!sampleData) return [];
+      return JSON.parse(sampleData);
+    }
+
+    const parsedData = JSON.parse(rawData);
+    if (!Array.isArray(parsedData)) {
+      console.warn('Stored data is not an array');
+      return [];
+    }
+
+    console.log(`Processing ${parsedData.length} transactions...`);
+    
+    const transactions = parsedData
+      .map((item, index) => {
+        try {
+          if (!item || typeof item !== 'object') return null;
+
+          const amountKey = Object.keys(item).find(key => 
+            key.toLowerCase().includes('amount') || 
+            key.toLowerCase().includes('total') ||
+            key.toLowerCase().includes('debit') ||
+            key.toLowerCase().includes('credit')
+          );
+          
+          const dateKey = Object.keys(item).find(key => 
+            key.toLowerCase().includes('date')
+          );
+
+          if (!amountKey || !dateKey) return null;
+
+          const rawAmount = item[amountKey]?.toString() || '0';
+          let amount = parseFloat(rawAmount.replace(/[^0-9.\-]/g, ''));
+          if (isNaN(amount)) amount = 0;
+
+          const transaction: Transaction = {
+            date: item[dateKey] || '',
+            description: item['Description'] || item['DESCRIPTION'] || item['description'] || 'No Description',
+            category: item['Category'] || item['CATEGORY'] || item['category'] || 'Uncategorized',
+            amount: amount,
+            type: amount >= 0 ? 'Payment' : 'Sale'
+          };
+
+          return transaction;
+        } catch (itemError) {
+          return null;
+        }
+      })
+      .filter((t): t is Transaction => t !== null);
+
+    console.log(`Successfully processed ${transactions.length} valid transactions`);
+    return transactions;
+  } catch (error) {
+    console.error('Error in getSpendingData:', error);
+    return [];
+  }
+};
+
+export function exportInvestmentsData(): string {
+  const data = getInvestmentsData();
+  if (!data || data.length === 0) return '';
+  
+  const headers = Object.keys(data[0]);
+  const csvRows = [headers.join(',')];
+  
+  data.forEach((row: Investment) => {
+    const values = headers.map(header => String(row[header as keyof Investment] || ''));
+    csvRows.push(values.join(','));
+  });
+  
+  return csvRows.join('\n');
+}
+
+export async function exportSpendingData(): Promise<string> {
+  const data = await getSpendingData();
+  if (!data || data.length === 0) return '';
+  
+  const headers = ['date', 'category', 'amount'];
+  const csvRows = [headers.join(',')];
+  
+  data.forEach((transaction: Transaction) => {
+    const values = headers.map(header => transaction[header as keyof Transaction]);
+    csvRows.push(values.join(','));
+  });
+  
+  return csvRows.join('\n');
+}
+
+export function downloadCSV(data: string, filename: string): void {
+  const blob = new Blob([data], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.setAttribute('hidden', '');
+  a.setAttribute('href', url);
+  a.setAttribute('download', filename);
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
+}
+
+export const parseCSVData = (newData: string): Transaction[] => {
+  try {
+    if (!newData?.trim()) {
+      console.warn('Empty CSV data provided');
+      return [];
+    }
+
+    const lines = newData.split('\n').map(line => line.trim()).filter(Boolean);
+    if (lines.length < 2) {
+      console.warn('CSV data contains no transactions');
+      return [];
+    }
+
+    // Parse headers with validation
+    const headers = lines[0].split(',').map(header => header.trim());
+    if (headers.length === 0) {
+      console.warn('No headers found in CSV');
+      return [];
+    }
+
+    // Process transactions with error handling
+    const transactions = lines.slice(1)
+      .map((line, index) => {
+        try {
+          const values = line.split(',').map(value => value.trim());
+          if (values.length !== headers.length) {
+            console.warn(`Skipping malformed line ${index + 2}: column count mismatch`);
+            return null;
+          }
+
+          // Create raw transaction object
+          const rawTransaction = headers.reduce((obj, header, i) => {
+            obj[header] = values[i];
+            return obj;
+          }, {} as Record<string, string>);
+
+          // Process using the same logic as getSpendingData
+          const amountKey = findMatchingKey(rawTransaction, ['amount', 'total', 'debit', 'credit']);
+          const dateKey = findMatchingKey(rawTransaction, ['date', 'time']);
+          const descriptionKey = findMatchingKey(rawTransaction, ['description', 'memo', 'details']);
+          const categoryKey = findMatchingKey(rawTransaction, ['category', 'type']);
+
+          const amount = normalizeAmount(safeGet(rawTransaction, amountKey, 0));
+          const date = safeGet(rawTransaction, dateKey);
+          const description = safeGet(rawTransaction, descriptionKey, 'No Description');
+          const category = safeGet(rawTransaction, categoryKey, 'Uncategorized');
+
+          // Validate required fields
+          if (!validators.isValidDate(date)) {
+            console.warn(`Invalid date in CSV row ${index + 2}:`, date);
+            return null;
+          }
+
+          return {
+            date,
+            description,
+            category,
+            amount,
+            type: amount < 0 ? 'Payment' : 'Purchase'
+          };
+        } catch (lineError) {
+          console.error(`Error processing CSV line ${index + 2}:`, lineError);
+          return null;
+        }
+      })
+      .filter(Boolean) as Transaction[];
+
+    // Only save and dispatch if we have valid transactions
+    if (transactions.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+      window.dispatchEvent(new Event('spendingDataUpdated'));
+      console.info(`Successfully processed ${transactions.length} transactions`);
+    } else {
+      console.warn('No valid transactions found in CSV');
+    }
+
+    return transactions;
+  } catch (error) {
+    console.error('Critical error parsing CSV data:', error);
+    return [];
+  }
+};
